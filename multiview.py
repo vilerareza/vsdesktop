@@ -2,99 +2,112 @@ from kivy.lang import Builder
 from kivy.metrics import dp
 from kivy.properties import ListProperty, ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.scrollview import ScrollView
 
-from streamlayout import StreamBox, StreamGrid
-from streamitem import StreamItem
-from multiselectionbox import MultiSelectionBox
-from multi_selection_item_image import ItemImage
-from multi_selection_container import ItemContainer
+from livegridlayout import LiveGridLayout
+from selectionbox import SelectionBox
+from deviceicon import DeviceIcon
+from livebox import LiveBox
 
 import sqlite3
 
-#Builder.load_file("multiview_test7.kv")
+Builder.load_file("multiview.kv")
 
 class Multiview(BoxLayout):
 
     testUrl = "images/test.mp4"
 
     db = ObjectProperty({'dbName': 'test.db', 'tableName': 'camera'})
-    # Layout boxes
-    streamBox = ObjectProperty(None)
-    streamGrid = ObjectProperty(None)
-    multiSelectionBox = ObjectProperty(None)
-    # Object lists
-    itemImages = ListProperty([])
-    streams = ListProperty([])
-    itemContainers = ListProperty([])
+    # Layout boxes #
+    # Grid layout for live stream
+    liveGrid = ObjectProperty(None)
+    # Layout for device selection to stream
+    selectionBox = ObjectProperty(None)
+    # Selection scroll view
+    selectionScroll = ObjectProperty(None)
+    # Object lists #
+    # List for live stream objects
+    liveBoxes = ListProperty([])
+    # List for device selection icons
+    deviceIcons = ListProperty([])
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.orientation = "vertical"
         # Stream box (empty)
-        self.streamBox = StreamBox(orientation="horizontal")
-        self.streamGrid = StreamGrid(rows=1)
-        self.streamBox.add_widget(self.streamGrid)
-        self.add_widget(self.streamBox)
+        self.liveGrid = LiveGridLayout(rows=1, spacing = 15)
+        self.add_widget(self.liveGrid)
+        # Selection scroll 
+        #self.selectionScroll = ScrollView(do_scroll_y = False, do_scroll_x = True, size_hint_y = None, height = 50, bar_width = 3,bar_pos_x = 'top', bar_color = (0.47,0.81,0.99,0.7), bar_inactive_color = (0.47,0.81,0.99,0.4), bar_margin = 0)
+        self.selectionScroll = ScrollView(do_scroll_y = False, do_scroll_x = True, size_hint_y = None, height = 50, bar_width = 3,bar_pos_x = 'top', bar_color = (0.7,0.7,0.7,0.7), bar_inactive_color = (0.7,0.7,0.7,0.4), bar_margin = 0)
         # Selection box (empty)
-        self.multiSelectionBox = MultiSelectionBox(orientation="horizontal",  size_hint = (1, None), height = 50, spacing = 15, padding = [0])
-        self.add_widget(self.multiSelectionBox)
+        self.selectionBox = SelectionBox(size_hint = (None, 1), spacing = 15, padding = [0, 3, 0, 0])
+        self.selectionScroll.add_widget(self.selectionBox)
+        self.add_widget(self.selectionScroll)
         # Get devices
         self.get_items_from_db()
 
-    def add_live_item(self, widget, touch):
-        if widget.collide_point(*touch.pos):
-            if widget.isEnabled:
-                if self.streams[self.itemContainers.index(widget)].state is not "play":
-                    #v2=Video(source=widget.camera_url+"?start")
-                    #self.streams[self.itemImages.index(widget)] =Video(source=widget.camera_url)
-                    self.streams[self.itemContainers.index(widget)].source = widget.deviceUrl
-                    #self.v2.bind(on_touch_down=self.remove_live_item)
-                    self.streamGrid.nLive +=1
-                    nLiveMax = self.streamGrid.rows**2 + self.streamGrid.rows
+    def add_live_box(self, deviceIcon, touch):
+        if deviceIcon.collide_point(*touch.pos):
+            if deviceIcon.isEnabled:
+                if self.liveBoxes[self.deviceIcons.index(deviceIcon)].status is not "play":
+                    # If the live stream object status is not playing then add #
+                    # Start the live steaming object
+                    if (deviceIcon.deviceName == "Device 1"):
+                        self.liveBoxes[self.deviceIcons.index(deviceIcon)].start_live_stream(deviceIcon.deviceUrl+"?start")                    
+                    else:
+                        self.liveBoxes[self.deviceIcons.index(deviceIcon)].start_live_stream(self.testUrl)
+                    # Adjust live grid layout for displaying live stream #
+                    self.liveGrid.nLive +=1
+                    nLiveMax = self.liveGrid.rows**2 + self.liveGrid.rows
                     # Add row to grid item if already reach maximum item
-                    if self.streamGrid.nLive > nLiveMax:
-                        self.streamGrid.rows +=1
-                    self.streamGrid.add_widget(self.streams[self.itemContainers.index(widget)])
-                    self.streams[self.itemContainers.index(widget)].reload()
-                    self.streams[self.itemContainers.index(widget)].state = "play" 
+                    if self.liveGrid.nLive > nLiveMax:
+                        self.liveGrid.rows +=1
+                    # Display the live stream object to live grid layout
+                    self.liveGrid.add_widget(self.liveBoxes[self.deviceIcons.index(deviceIcon)])
                 else:
-                    self.remove_live_item(widget)
+                    # If the live stream object status is playing then remove
+                    self.remove_live_box(deviceIcon)
 
-    def remove_live_item(self, widget):
-        # Remove widget
-        self.streams[self.itemContainers.index(widget)].state = "stop"
-        self.streamGrid.remove_widget(self.streams[self.itemContainers.index(widget)])
-        self.streamGrid.nLive -=1
-        nLiveMin = (self.streamGrid.rows-1)**2 + (self.streamGrid.rows-1)
-        if self.streamGrid.nLive <= nLiveMin:
-                self.streamGrid.rows -=1
-                print(self.streamGrid.nLive)
+    def remove_live_box(self, deviceIcon):
+        # Stop live stream object
+        self.liveBoxes[self.deviceIcons.index(deviceIcon)].stop_live_stream()
+        # Remove live stream object from live grid layout
+        self.liveGrid.remove_widget(self.liveBoxes[self.deviceIcons.index(deviceIcon)])
+        # Re-adjust live grid layout
+        self.liveGrid.nLive -=1
+        nLiveMin = (self.liveGrid.rows-1)**2 + (self.liveGrid.rows-1)
+        if self.liveGrid.nLive <= nLiveMin:
+                self.liveGrid.rows -=1
+                print(self.liveGrid.nLive)
                 print (nLiveMin)
-        print(self.streamGrid.nLive) 
+        print(self.liveGrid.nLive) 
 
-    def stop_threads(self):
-        for container in self.itemContainers:
-            container.stop()
+    def stop_icons(self):
+        for deviceIcon in self.deviceIcons:
+            deviceIcon.stop()
+        self.selectionBox.clear_widgets()
+        self.deviceIcons.clear()
+
+    def stop_streams(self):
+        # Stop live streams anyway
+        for liveBox in self.liveBoxes:
+            liveBox.stop_live_stream()
+        # Reset and clearing widgets from liveGrid
+        self.liveGrid.clear_widgets()
+        self.liveGrid.nLive = 0
+        self.liveGrid.rows = 1
+        # Clear the list of live stream objects
+        self.liveBoxes.clear()
 
     def stop(self):
-        # Stop videos
-        for stream in self.streams:
-            stream.state = "stop"
-        # Clearing widgets
-        self.streamGrid.clear_widgets()
-        self.streamGrid.nLive = 0
-        self.streamGrid.rows = 1
-        # Stop threads
-        self.stop_threads()
+        self.stop_streams()
+        self.stop_icons()
 
     def get_items_from_db(self):
-        # Clearing previous list if any
-        if len(self.itemContainers) > 0:
-            self.stop_threads()
-            self.itemContainers.clear()
-            self.multiSelectionBox.clear_widgets()
-        # Clearing widgets
-        #self.streams.clear()
+        # Clearing previous device stream objects and icons if any
+        if len(self.deviceIcons) > 0:
+            self.stop()
         # Connect to database
         dbName = self.db['dbName']
         tableName = self.db['tableName']
@@ -102,18 +115,29 @@ class Multiview(BoxLayout):
         con = sqlite3.connect(dbName)
         cur = con.cursor()
         cur.execute(sql)
-        # Get stream and selection items
+        # Get device icons and stream objects
         for entry in cur:
             deviceID = entry [0]
             deviceName = entry[1]
             deviceUrl = entry [2]
-            # Fill item container
-            self.itemContainers.append(ItemContainer(deviceName = deviceName, deviceUrl = self.testUrl, size_hint = (None, 1), width = 185))
-            # stream item
-            self.streams.append(StreamItem())
+            # Fill device icon list
+            self.deviceIcons.append(DeviceIcon(deviceName = deviceName, deviceUrl = deviceUrl, size_hint = (None, 1), width = 185))
+            # Fill live stream object list
+            self.liveBoxes.append(LiveBox())
         con.close()
-        # Binding container touch down event to function and display the container
-        for container in self.itemContainers:
-            container.bind(on_touch_down=self.add_live_item)
-            self.multiSelectionBox.add_widget(container)
-            
+        # Add the container to selection box
+        for deviceIcon in self.deviceIcons:
+            self.selectionBox.add_widget(deviceIcon)
+    
+    def start_icons(self):
+        if (len(self.deviceIcons) > 0):
+            for deviceIcon in self.deviceIcons:
+                # Start the status checker
+                deviceIcon.start_status_checker()
+                # Binding the touch down event
+                deviceIcon.bind(on_touch_down=self.add_live_box)
+
+    def experiment_function(self, widget, touch):
+        if widget.collide_point(*touch.pos):
+            widget.texture.save("testimage.jpg")
+            print ("Stream 1 TOUCHED")

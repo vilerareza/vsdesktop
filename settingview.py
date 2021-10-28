@@ -18,15 +18,15 @@ import sqlite3
 class SettingView(BoxLayout):
 
     db = ObjectProperty({'dbName': 'test.db', 'tableName': 'camera'})
-    leftBox = ObjectProperty()
-    deviceInfo = ObjectProperty()
-    deviceEntry = ObjectProperty()
-    listBox = ObjectProperty()
-    tAddress = ObjectProperty()
-    tName = ObjectProperty()
-    bAdd = ObjectProperty
+    leftBox = ObjectProperty(None)
+    deviceInfo = ObjectProperty(None)
+    deviceEntry = ObjectProperty(None)
+    listBox = ObjectProperty(None)
+    tAddress = ObjectProperty(None)
+    tName = ObjectProperty(None)
+    bAdd = ObjectProperty(None)
     devices = ListProperty([])
-    deviceList = ObjectProperty()
+    deviceList = ObjectProperty(None)
     
     def add_to_db (self, deviceEntry, isNewDevice):
         if (isNewDevice == True): 

@@ -18,6 +18,7 @@ class ColoredBox(BoxLayout):
         super().__init__(**kwargs)
         with self.canvas.before:
             Color(color[0],color[1],color[2])
+            #Color(random.random(),random.random(),random.random())
             self.rect = Rectangle (pos=self.pos, size = self.size)
             self.bind (pos = self.update_rect, size = self.update_rect)
     def update_rect(self, *args):
@@ -88,3 +89,7 @@ class ImageButton (ButtonBehavior, Image):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         pass
+
+class LogoBar (FloatLayout):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)

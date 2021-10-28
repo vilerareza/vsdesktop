@@ -9,9 +9,9 @@ from kivy.uix.label import Label
 from kivy.uix.floatlayout import FloatLayout
 from kivy.properties import ObjectProperty, StringProperty, BooleanProperty
 
-from multi_selection_item_image import ItemImage
+from deviceiconimage import IconImage
 
-class ItemContainer(FloatLayout):
+class DeviceIcon(FloatLayout):
     statusImage = ObjectProperty(None)
     deviceName = StringProperty("")
     deviceUrl = StringProperty("")
@@ -23,22 +23,18 @@ class ItemContainer(FloatLayout):
     request_param_start = "?start"
     request_param_stop = "?stop"
     stop_flag = False
+    source1 = "http://192.168.0.100:8000/"
 
     def __init__(self, deviceName, deviceUrl, **kwargs):
         super().__init__(**kwargs)
         self.deviceName = deviceName
         self.deviceUrl = deviceUrl
-        self.statusImage = ItemImage(deviceName = self.deviceName, deviceUrl = self.deviceUrl)
+        self.statusImage = IconImage(deviceName = self.deviceName, deviceUrl = self.deviceUrl)
         self.statusImage.source = "images/connecting.png"
         self.deviceLabel = Label(text = "", font_size = 18, font_family = "arial", halign = 'center', valign = 'middle', size_hint = (None, None), size = (120,40), pos_hint = {'center_x':0.5, 'center_y': 0.5}, markup = True)
         #Add widgets
         self.add_widget(self.statusImage)
         self.add_widget(self.deviceLabel)
-        # Start the status checker thread
-        if not (self.t_status_checker):
-           self.t_status_checker = threading.Thread(target = self.check)
-           print ('Starting device checker thread')
-           self.t_status_checker.start()
     #     with self.canvas.before:
     #         self.r = random.random()
     #         self.g = random.random()
@@ -51,9 +47,17 @@ class ItemContainer(FloatLayout):
     #     self.rect.pos = self.pos
     #     self.rect.size = self.size
 
+    def start_status_checker(self):
+        #Start the status checker thread
+        if not (self.t_status_checker):
+           self.t_status_checker = threading.Thread(target = self.check)
+           print ('Starting device checker thread')
+           self.t_status_checker.start()
+
     def check_camera(self):
         print ('check device')
         req = UrlRequest(url=(self.deviceUrl+self.request_param_check), on_success = self.callback_ok, timeout=2, on_error = self.callback_fail, on_failure = self.callback_fail)
+        #req = UrlRequest(url=(self.source1+self.request_param_check), on_success = self.callback_ok, timeout=2, on_error = self.callback_fail, on_failure = self.callback_fail)
         
     def check(self):
         while (not self.stop_flag):
@@ -62,12 +66,16 @@ class ItemContainer(FloatLayout):
                 if not (self.condition.wait(timeout = 2)):
                     # Timeout. No frame detected
                     self.check_camera()
+        # Stop the thread
+        if (self.t_status_checker):
+            #self.t_status_checker.join (timeout = 0.5)
+            self.t_status_checker = None
 
     def callback_ok(self, request, result):
         print ("callback OK is called")
         # Enable the item
         self.isEnabled = True
-        self.statusImage.source = "images/play.png"
+        self.statusImage.source = "images/play3.png"
         self.deviceLabel.text = "[color=cccccc]"+self.deviceName+"[/color]"
         
     def callback_fail(self,request, result):
@@ -75,10 +83,8 @@ class ItemContainer(FloatLayout):
         # Disable the frame
         #self.isEnabled = False
         #self.statusImage.source = "images/play.png"
-        self.statusImage.source = "images/play3.png"
-        self.deviceLabel.text = "[color=cccccc]"+self.deviceName+"[/color]"
+        self.statusImage.source = "images/stop2.png"
+        self.deviceLabel.text = "[color=777777]"+self.deviceName+"[/color]"
 
     def stop(self):
         self.stop_flag=True
-    
-    

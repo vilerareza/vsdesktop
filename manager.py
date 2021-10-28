@@ -8,9 +8,9 @@ from kivy.uix.image import Image
 from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelItem
 from kivy.graphics import Color, Rectangle
 
+from mylayoutwidgets import LogoBar
 from settingview import SettingView
 from multiview import Multiview
-
     
 class Manager(BoxLayout):
 
@@ -21,7 +21,7 @@ class Manager(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # Logo bar
-        self.logoBar = LogoBar(size_hint = (1, None), height = 30)
+        self.logoBar = LogoBar(size_hint = (1,None), height = 30)
         # Adding image, original size is 300x78
         self.logoBar.add_widget(Image(source = "images/vs_logo2.png", pos_hint = {'left': 1, 'top': 1}, size_hint = (None, 1), width = 130))
         self.add_widget(self.logoBar)
@@ -60,10 +60,7 @@ class VsDesktopTabs(TabbedPanel):
         if tab.state == "down":
             # Refresh the device list
             self.multiView.get_items_from_db()
+            self.multiView.start_icons()
             
     def stop(self):
-        self.multiView.stop_threads()
-
-class LogoBar (FloatLayout):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        self.multiView.stop()
