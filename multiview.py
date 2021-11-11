@@ -53,7 +53,7 @@ class Multiview(BoxLayout):
                 if self.liveBoxes[self.deviceIcons.index(deviceIcon)].status is not "play":
                     # If the live stream object status is not playing then add #
                     # Start the live steaming object
-                    if (deviceIcon.deviceName == "Device 1"):
+                    if (deviceIcon.deviceName == "Device 1" or deviceIcon.deviceName == "Device 2"):
                         self.liveBoxes[self.deviceIcons.index(deviceIcon)].start_live_stream(deviceIcon.deviceUrl+"?start")                    
                     else:
                         self.liveBoxes[self.deviceIcons.index(deviceIcon)].start_live_stream(self.testUrl)

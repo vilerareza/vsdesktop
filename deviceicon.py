@@ -1,7 +1,5 @@
 import random
 import threading
-from functools import partial
-from threading import Condition
 from kivy.network.urlrequest import UrlRequest
 from kivy.graphics import Color, Rectangle
 from kivy.metrics import dp
@@ -18,7 +16,7 @@ class DeviceIcon(FloatLayout):
     deviceLabel = ObjectProperty(None)
     isEnabled = BooleanProperty(True)
     t_status_checker = None
-    condition = Condition()
+    condition = threading.Condition()
     request_param_check = "?check"
     request_param_start = "?start"
     request_param_stop = "?stop"
@@ -55,7 +53,7 @@ class DeviceIcon(FloatLayout):
            self.t_status_checker.start()
 
     def check_camera(self):
-        print ('check device')
+        #print ('check device')
         req = UrlRequest(url=(self.deviceUrl+self.request_param_check), on_success = self.callback_ok, timeout=2, on_error = self.callback_fail, on_failure = self.callback_fail)
         #req = UrlRequest(url=(self.source1+self.request_param_check), on_success = self.callback_ok, timeout=2, on_error = self.callback_fail, on_failure = self.callback_fail)
         
@@ -72,14 +70,14 @@ class DeviceIcon(FloatLayout):
             self.t_status_checker = None
 
     def callback_ok(self, request, result):
-        print ("callback OK is called")
+        #print ("callback OK is called")
         # Enable the item
         self.isEnabled = True
         self.statusImage.source = "images/play3.png"
         self.deviceLabel.text = "[color=cccccc]"+self.deviceName+"[/color]"
         
     def callback_fail(self,request, result):
-        print('callback fail called')
+        #print('callback fail called')
         # Disable the frame
         #self.isEnabled = False
         #self.statusImage.source = "images/play.png"

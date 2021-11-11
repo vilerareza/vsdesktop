@@ -84,6 +84,8 @@ class ButtonBinded(Button):
         self.x = x + int(offset)
     def align_right(self, widget, right):
         self.right = right
+    def align_top(self, widget, top):
+        self.top = top
 
 class ImageButton (ButtonBehavior, Image):
     def __init__(self, **kwargs):

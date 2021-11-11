@@ -7,7 +7,7 @@ class VsDesktopApp(App):
 
     manager = ObjectProperty(None)
     stop_flag = BooleanProperty(False)
-
+    
     def build (self):
         self.manager = Manager()
         return self.manager
