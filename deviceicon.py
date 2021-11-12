@@ -21,7 +21,7 @@ class DeviceIcon(FloatLayout):
     request_param_start = "?start"
     request_param_stop = "?stop"
     stop_flag = False
-    source1 = "http://192.168.0.100:8000/"
+    source1 = "images/5sos.jpg"
 
     def __init__(self, deviceName, deviceUrl, **kwargs):
         super().__init__(**kwargs)

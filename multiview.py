@@ -3,6 +3,8 @@ from kivy.metrics import dp
 from kivy.properties import ListProperty, ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scrollview import ScrollView
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.button import Button
 
 from livegridlayout import LiveGridLayout
 from selectionbox import SelectionBox
@@ -15,7 +17,7 @@ Builder.load_file("multiview.kv")
 
 class Multiview(BoxLayout):
 
-    testUrl = "images/test.mp4"
+    testUrl = "images/5sos.mp4"
 
     db = ObjectProperty({'dbName': 'test.db', 'tableName': 'camera'})
     # Layout boxes #
@@ -37,13 +39,19 @@ class Multiview(BoxLayout):
         # Stream box (empty)
         self.liveGrid = LiveGridLayout(rows=1, spacing = 15)
         self.add_widget(self.liveGrid)
+        self.selection = GridLayout(cols =3, size_hint = (1, None), height = 50)
+        self.nextButton = Button(background_normal = 'images/right3.png', size_hint = (0.25, 1))
+        self.previousButton = Button(background_normal = 'images/left3.png', size_hint = (0.25, 1))
         # Selection scroll 
         #self.selectionScroll = ScrollView(do_scroll_y = False, do_scroll_x = True, size_hint_y = None, height = 50, bar_width = 3,bar_pos_x = 'top', bar_color = (0.47,0.81,0.99,0.7), bar_inactive_color = (0.47,0.81,0.99,0.4), bar_margin = 0)
-        self.selectionScroll = ScrollView(do_scroll_y = False, do_scroll_x = True, size_hint_y = None, height = 50, bar_width = 3,bar_pos_x = 'top', bar_color = (0.7,0.7,0.7,0.7), bar_inactive_color = (0.7,0.7,0.7,0.4), bar_margin = 0)
+        self.selectionScroll = ScrollView(do_scroll_y = False, do_scroll_x = True, bar_pos_x = 'top', size_hint = (0.5, 1), bar_width = 3, bar_color = (0.7,0.7,0.7,0.7), bar_inactive_color = (0.7,0.7,0.7,0.4), bar_margin = 0)
         # Selection box (empty)
-        self.selectionBox = SelectionBox(size_hint = (None, 1), spacing = 15, padding = [0, 3, 0, 0])
+        self.selectionBox = SelectionBox(spacing = 15, padding = [0, 3, 0, 0])
         self.selectionScroll.add_widget(self.selectionBox)
-        self.add_widget(self.selectionScroll)
+        self.selection.add_widget(self.previousButton)
+        self.selection.add_widget(self.selectionScroll)
+        self.selection.add_widget(self.nextButton)
+        self.add_widget(self.selection)
         # Get devices
         self.get_items_from_db()
 
@@ -126,6 +134,7 @@ class Multiview(BoxLayout):
             self.liveBoxes.append(LiveBox())
         con.close()
         # Add the container to selection box
+        
         for deviceIcon in self.deviceIcons:
             self.selectionBox.add_widget(deviceIcon)
     

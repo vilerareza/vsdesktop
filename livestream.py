@@ -18,11 +18,11 @@ class LiveStream(Video):
     processThisFrame = True
     t_process_frame = None
     target_size = (224, 224, 3)
-    modelLocation = "C:/Users/Reza Vilera/.deepface/weights/vgg_face_model_loaded.h5"
-    imageDbLocation = "E:/testimages/facetest/facedb/"
+    modelLocation = "D:\Pak Reza\detection\Deep Face\Weights\model_vgg_face_loaded.h5"
+    imageDbLocation = "imageDatabase"
     model = None
     filePaths=[]
-    fileNames=[]
+    fileLabels=[]
     dbVectors=[]
     frameCount = 0
 
@@ -32,11 +32,11 @@ class LiveStream(Video):
         self.source = ""
         self.texture = Texture.create()
         # Detector
-        self.detector = CascadeClassifier("haarcascade_frontalface_default.xml")
+        self.detector = CascadeClassifier("D:\Pak Reza\detection\Deep Face\Weights\haarcascade_frontalface_default.xml")
         # Recognition
         self.model = models.load_model(self.modelLocation)
         # Create database vectors
-        self.filePaths, self.fileNames, self.dbVectors = self.createDatabase()
+        self.filePaths, self.fileLabels, self.dbVectors = self.createDatabase()
 
     # Video Frame Event Function
     def _on_video_frame(self, *largs):
@@ -67,7 +67,7 @@ class LiveStream(Video):
             # # Recognition
             vectors = self.predict(faces, self.model)
             # # Find face label
-            faceLabels = self.find_face_label(vectors, self.dbVectors, self.fileNames)
+            faceLabels = self.find_face_label(vectors, self.dbVectors, self.fileLabels)
             # # Bounding boxes drawing
             self.clear_widgets()
             self.canvas.after.clear()
@@ -114,46 +114,59 @@ class LiveStream(Video):
             distance = np.sqrt(distance)
             distances.append(distance)
         return distances
+    
+    def findDistances2(self, testVector, sampleVector):
+        distances = []
+        for vector in sampleVector:
+            # Cosine Distance
+            a = np.matmul(np.transpose(vector), testVector)
+            b = np.sum(np.multiply(vector, vector))
+            c = np.sum(np.multiply(testVector, testVector))
+            distance = 1 - (a / (np.sqrt(b) * np.sqrt(c)))
+            distances.append(distance)
+        return distances
 
     def createDatabase(self):
-        files = os.listdir(self.imageDbLocation)
         filePaths = []
-        fileNames = []
+        fileLabels = []
         dBvectors = []
-        for file in files:
-            filePath = os.path.join(self.imageDbLocation, file)
-            filePaths.append(filePath)
-            fileName = os.path.splitext(file)[0]
-            fileNames.append(fileName)
-            # Reading image from file
-            img = imread(filePath)
-            # Detect face
-            bboxes = self.detector.detectMultiScale(img)
-            # first face only
-            box = bboxes[0]
-            # Preprocess face
-            x, y, width, height = box
-            face = img[y:y+height,x:x+width,::]
-            factor_y = self.target_size[0] / face.shape[0]
-            factor_x = self.target_size[1] / face.shape[1]
-            factor = min (factor_x, factor_y)
-            face = resize(face, (int(face.shape[0]* factor), int(face.shape[1]*factor)))
-            diff_y = self.target_size[0] - face.shape[0]
-            diff_x = self.target_size[1] - face.shape[1]
-            # Padding
-            face = np.pad(face, ((diff_y//2, diff_y - diff_y//2), (diff_x//2, diff_x-diff_x//2), (0,0)), 'constant')
-            face = np.expand_dims(face, axis=0)
-            face = face/255
-            # Predict vector
-            vector = self.model.predict(face)[0]
-            dBvectors.append(vector)
+        label_list = os.listdir(self.imageDbLocation)
+        for label in label_list:
+            label_path = os.path.join(self.imageDbLocation, label)
+            image_path = os.listdir(label_path)
+            for image in image_path:
+                filePath = os.path.join(label_path, image)
+                filePaths.append(filePath)
+                fileLabels.append(label)
+                # Reading image from file
+                img = imread(filePath)
+                # Detect face
+                bboxes = self.detector.detectMultiScale(img)
+                # first face only
+                box = bboxes[0]
+                # Preprocess face
+                x, y, width, height = box
+                face = img[y:y+height,x:x+width,::]
+                factor_y = self.target_size[0] / face.shape[0]
+                factor_x = self.target_size[1] / face.shape[1]
+                factor = min (factor_x, factor_y)
+                face = resize(face, (int(face.shape[0]* factor), int(face.shape[1]*factor)))
+                diff_y = self.target_size[0] - face.shape[0]
+                diff_x = self.target_size[1] - face.shape[1]
+                # Padding
+                face = np.pad(face, ((diff_y//2, diff_y - diff_y//2), (diff_x//2, diff_x-diff_x//2), (0,0)), 'constant')
+                face = np.expand_dims(face, axis=0)
+                face = face/255
+                # Predict vector
+                vector = self.model.predict(face)[0]
+                dBvectors.append(vector)
         
-        return filePaths, fileNames, dBvectors
+        return filePaths, fileLabels, dBvectors
 
     def find_face_label(self, faceVectors, dbVectors, nameLabel):
         faceLabels = []
         for vector in faceVectors:
-            distances = self.findDistances(vector, dbVectors)
+            distances = self.findDistances2(vector, dbVectors)
             # faceLabel as a shortest distance
             faceLabel = nameLabel[np.argmin(distances)]
             faceLabels.append(faceLabel)
