@@ -1,11 +1,11 @@
 from kivy.lang import Builder
 from kivy.metrics import dp
-from kivy.properties import ObjectProperty, ListProperty
+from kivy.properties import ObjectProperty, ListProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
+ 
 from deviceentry import DeviceEntry
-
 from mylayoutwidgets import ColoredBox
 from deviceitem import DeviceItem
 from devicelist import DeviceList
@@ -17,7 +17,7 @@ import sqlite3
 
 class SettingView(BoxLayout):
 
-    db = ObjectProperty({'dbName': 'test.db', 'tableName': 'camera'})
+    db = ObjectProperty({'dbName': 'test2.db', 'tableName': 'camera'})
     leftBox = ObjectProperty(None)
     deviceInfo = ObjectProperty(None)
     deviceEntry = ObjectProperty(None)
@@ -27,6 +27,7 @@ class SettingView(BoxLayout):
     bAdd = ObjectProperty(None)
     devices = ListProperty([])
     deviceList = ObjectProperty(None)
+    recognitionStatus = StringProperty("Stop")
     
     def add_to_db (self, deviceEntry, isNewDevice):
         if (isNewDevice == True): 
@@ -34,9 +35,10 @@ class SettingView(BoxLayout):
             tableName = self.db['tableName']
             camName = deviceEntry.deviceNameText.text
             camUrl = deviceEntry.deviceUrlText.text
+            recognition = self.recognitionStatus
             # Check if exist
             if not (self.check_name_exist_db(camName)):
-                sql = "INSERT INTO "+tableName+" (camName, camUrl) VALUES ('"+camName+"','"+camUrl+"')"
+                sql = "INSERT INTO "+tableName+" (camName, camUrl, recognition) VALUES ('"+camName+"','"+camUrl+"','"+recognition+"')"
                 con = sqlite3.connect(dbName)
                 cur = con.cursor()
                 cur.execute(sql)
@@ -61,7 +63,8 @@ class SettingView(BoxLayout):
                 newDeviceName = str(self.deviceInfo.deviceNameText.text)
                 newDeviceUrl = str(self.deviceInfo.deviceUrlText.text)
                 deviceID = str(self.deviceList.selectedDevice.deviceID)
-                sql = "UPDATE "+tableName+" SET camName = '"+newDeviceName+"', camUrl = '"+newDeviceUrl+"' WHERE camID = "+deviceID+""
+                newRecognition = self.deviceInfo.recognitionStatus
+                sql = "UPDATE "+tableName+" SET camName = '"+newDeviceName+"', camUrl = '"+newDeviceUrl+"', recognition = '"+newRecognition+"' WHERE camID = "+deviceID+""
                 print (sql)
                 con = sqlite3.connect(dbName)
                 cur = con.cursor()
@@ -85,6 +88,8 @@ class SettingView(BoxLayout):
                 #     if device.deviceName == newDeviceName:
                 #         print (str(device.deviceName))
                 #         self.deviceList.select_node(device)
+                    
+
             else:
                 # Disable the device list
                 self.deviceList.disabled = True
@@ -107,6 +112,21 @@ class SettingView(BoxLayout):
         # Refresh devices
         self.refresh_devices()
 
+    def change_switch_db(self, widget):
+        dbName = self.db['dbName']
+        tableName = self.db['tableName']
+        deviceID = str(self.deviceList.selectedDevice.deviceID)
+        newRecognition = self.deviceInfo.recognitionStatus
+        sql = "UPDATE "+tableName+" SET recognition = '"+newRecognition+"'  WHERE camID = "+deviceID+""
+        print(sql)
+        con = sqlite3.connect(dbName)
+        cur = con.cursor()
+        cur.execute(sql)
+        con.commit()
+        con.close()
+        self.refresh_devices()
+
+
     def get_devices(self):
         # Connect to database
         dbName = self.db['dbName']
@@ -119,8 +139,9 @@ class SettingView(BoxLayout):
             deviceID = entry [0]
             deviceName = entry[1]
             deviceUrl = entry [2]
+            recognitionStatus = entry[3]
             imagePath = "images/device2.png"
-            self.devices.append(DeviceItem(deviceID = deviceID, deviceName = deviceName, deviceUrl = deviceUrl, imagePath=imagePath, size_hint = (None, None), size = (95,85)))
+            self.devices.append(DeviceItem(deviceID = deviceID, deviceName = deviceName, deviceUrl = deviceUrl, recognitionStatus = recognitionStatus, imagePath=imagePath, size_hint = (None, None), size = (95,85)))
         con.close()
 
     def check_name_exist_db(self, name):
@@ -171,6 +192,7 @@ class SettingView(BoxLayout):
 
         # Device info
         self.deviceInfo.bind(editMode = self.save_to_db)
+        # self.deviceInfo.switchButton.bind(on_active = self.change_switch_db)
         self.deviceInfo.removeButton.bind(on_press = self.remove_from_db)
         self.deviceInfo.removeButton.bind(on_press = self.deviceList.clear_selection)
         self.deviceInfo.dbDeviceNames = self.get_device_name_db()

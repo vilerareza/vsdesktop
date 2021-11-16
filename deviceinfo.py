@@ -3,6 +3,9 @@ from kivy.lang import Builder
 from kivy.metrics import dp
 from kivy.properties import BooleanProperty, ObjectProperty, NumericProperty, StringProperty
 from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.switch import Switch
+from kivy.uix.label import Label
 
 from mylayoutwidgets import ColorLabel
 from mylayoutwidgets import ToggleButtonBinded
@@ -24,11 +27,15 @@ class DeviceInfo(FloatLayout):
     deviceUrlText = ObjectProperty(None)
     editMode = BooleanProperty(False)
     saveToDb = BooleanProperty(False)
+    switchMode = BooleanProperty(False)
     validityMessageLabel = ObjectProperty(None)
     widget_x_offset = NumericProperty(0.25)
     dbDeviceNames = ObjectProperty(None)
     selectedDeviceName = StringProperty("")
     selectedDeviceUrl = StringProperty("")
+    switchBox = ObjectProperty(None)
+    switchButton = ObjectProperty(None)
+    recognitionStatus = StringProperty("Stop")
    
     def __init__(self, color, **kwargs):
         super().__init__(**kwargs)
@@ -43,6 +50,13 @@ class DeviceInfo(FloatLayout):
         self.removeButton = ButtonBinded (text = 'Remove', size_hint = (None, None), size = (dp(80), dp(40)))
         self.messageLabel = ColorLabel(text ='', font_size = 16, font_family = "arial", halign = 'center', valign = 'middle', pos_hint = {'center_x':0.5}, size_hint = (None, None), size = (200, 40), markup = True)
         self.validityMessageLabel = ColorLabel(text ='Validity message label', font_size = 16, font_family = "arial", halign = 'center', valign = 'middle', pos_hint = {'center_x':0.5}, size_hint = (None, None), size = (200, 40), markup = True)
+        #Switch
+        self.switchBox = BoxLayout(orientation = 'horizontal', pos_hint = {'x':self.widget_x_offset}, size_hint = (None, None), size = (250, 40))
+        self.switchLabel = Label(text = 'Face Recognition')
+        self.switchButton = Switch(active = False)
+        self.switchButton.bind(active = self.switch_click)
+        self.switchBox.add_widget(self.switchLabel)
+        self.switchBox.add_widget(self.switchButton)
         # Binding button press to change mode
         self.actionButton.bind(on_press = self.change_mode)
         # Position binding
@@ -61,6 +75,14 @@ class DeviceInfo(FloatLayout):
             self.rect = Rectangle (pos=self.pos, size = self.size)
             self.bind (pos = self.update_rect, size = self.update_rect)
     
+    def switch_click(self, switchObject, switchValue):
+        # print(self.recognitionStatus)
+        if (switchValue):
+            self.recognitionStatus = 'Start'
+        else:
+            self.recognitionStatus = 'Stop'
+
+
     def update_rect(self, *args):
         self.rect.pos = self.pos
         self.rect.size = self.size
@@ -71,6 +93,11 @@ class DeviceInfo(FloatLayout):
         self.titleLabel.text = "Device Info"
         self.deviceNameText.text = self.selectedDeviceName
         self.deviceUrlText.text = self.selectedDeviceUrl
+        if selectedDevice.recognitionStatus == 'Stop':
+            self.switchButton.active = False
+        else:
+            self.switchButton.active = True
+        
 
     def change_config(self, deviceList, isDeviceSelected, message = ""):
         print (isDeviceSelected)
@@ -100,6 +127,8 @@ class DeviceInfo(FloatLayout):
         self.add_widget(self.deviceUrlText)
         self.add_widget(self.actionButton)
         self.add_widget(self.removeButton)
+        self.add_widget(self.switchBox)
+        self.switchBox.disabled = True
     
     def change_mode(self, widget):
         # if self.entry_check (self.deviceNameText.text, self.deviceUrlText.text, self.get_name_from_parrent_devices()):
@@ -110,6 +139,8 @@ class DeviceInfo(FloatLayout):
             self.deviceNameText.disabled = False
             self.deviceUrlText.disabled = False
             self.removeButton.disabled = True
+            self.switchBox.disabled = False
+
         else:
             if self.entry_check (self.deviceNameText.text, self.deviceUrlText.text, self.dbDeviceNames):
                 # trigger to change entry in database
@@ -119,6 +150,7 @@ class DeviceInfo(FloatLayout):
                 self.deviceNameText.disabled = True
                 self.deviceUrlText.disabled = True
                 self.removeButton.disabled = False
+                self.switchBox.disabled = True
             else:
                 # Force button to stay down
                 self.actionButton.state = 'down'
