@@ -34,9 +34,11 @@ class SettingView(BoxLayout):
             tableName = self.db['tableName']
             camName = deviceEntry.deviceNameText.text
             camUrl = deviceEntry.deviceUrlText.text
+            # Device neural network default to 0
+            deviceNeuralNet = str(0)
             # Check if exist
             if not (self.check_name_exist_db(camName)):
-                sql = "INSERT INTO "+tableName+" (camName, camUrl) VALUES ('"+camName+"','"+camUrl+"')"
+                sql = "INSERT INTO "+tableName+" (camName, camUrl, neuralNet) VALUES ('"+camName+"','"+camUrl+"','"+deviceNeuralNet+"')"
                 con = sqlite3.connect(dbName)
                 cur = con.cursor()
                 cur.execute(sql)
@@ -60,8 +62,9 @@ class SettingView(BoxLayout):
                 tableName = self.db['tableName']
                 newDeviceName = str(self.deviceInfo.deviceNameText.text)
                 newDeviceUrl = str(self.deviceInfo.deviceUrlText.text)
+                deviceNeuralNet = str(self.deviceInfo.neuralNetActivated)
                 deviceID = str(self.deviceList.selectedDevice.deviceID)
-                sql = "UPDATE "+tableName+" SET camName = '"+newDeviceName+"', camUrl = '"+newDeviceUrl+"' WHERE camID = "+deviceID+""
+                sql = "UPDATE "+tableName+" SET camName = '"+newDeviceName+"', camUrl = '"+newDeviceUrl+"', neuralNet = '"+deviceNeuralNet+"' WHERE camID = "+deviceID+""
                 print (sql)
                 con = sqlite3.connect(dbName)
                 cur = con.cursor()
@@ -89,8 +92,9 @@ class SettingView(BoxLayout):
                 # Disable the device list
                 self.deviceList.disabled = True
 
-        except:
+        except Exception as e:
             print ('Failure on saving to database')
+            print (e)
 
     def remove_from_db(self, widget):
         print ('remove from db')
@@ -119,8 +123,9 @@ class SettingView(BoxLayout):
             deviceID = entry [0]
             deviceName = entry[1]
             deviceUrl = entry [2]
+            deviceNeuralNet = entry [3]
             imagePath = "images/device2.png"
-            self.devices.append(DeviceItem(deviceID = deviceID, deviceName = deviceName, deviceUrl = deviceUrl, imagePath=imagePath, size_hint = (None, None), size = (95,85)))
+            self.devices.append(DeviceItem(deviceID = deviceID, deviceName = deviceName, deviceUrl = deviceUrl, neuralNetwork = deviceNeuralNet, imagePath=imagePath, size_hint = (None, None), size = (95,85)))
         con.close()
 
     def check_name_exist_db(self, name):
@@ -166,13 +171,13 @@ class SettingView(BoxLayout):
             self.deviceList.add_widget(device)
         self.listBox.add_widget(self.deviceList)
         self.leftBox.add_widget(self.listBox)
-
         self.add_widget(self.leftBox)
 
         # Device info
         self.deviceInfo.bind(editMode = self.save_to_db)
         self.deviceInfo.removeButton.bind(on_press = self.remove_from_db)
         self.deviceInfo.removeButton.bind(on_press = self.deviceList.clear_selection)
+        self.deviceInfo.bind(neuralNetActivated = self.deviceList.activate_neuralnet_to_selected_device)
         self.deviceInfo.dbDeviceNames = self.get_device_name_db()
         self.add_widget(self.deviceInfo)
 

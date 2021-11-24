@@ -1,3 +1,4 @@
+from kivy.app import App
 from kivy.lang import Builder
 from kivy.metrics import dp
 from kivy.properties import ListProperty, ObjectProperty
@@ -30,6 +31,8 @@ class Multiview(BoxLayout):
     liveBoxes = ListProperty([])
     # List for device selection icons
     deviceIcons = ListProperty([])
+    # Application manager class
+    # manager = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -45,7 +48,7 @@ class Multiview(BoxLayout):
         self.selectionScroll.add_widget(self.selectionBox)
         self.add_widget(self.selectionScroll)
         # Get devices
-        self.get_items_from_db()
+        #self.get_items_from_db()
 
     def add_live_box(self, deviceIcon, touch):
         if deviceIcon.collide_point(*touch.pos):
@@ -65,6 +68,7 @@ class Multiview(BoxLayout):
                         self.liveGrid.rows +=1
                     # Display the live stream object to live grid layout
                     self.liveGrid.add_widget(self.liveBoxes[self.deviceIcons.index(deviceIcon)])
+                    print("nLive: "+str(self.liveGrid.nLive))
                 else:
                     # If the live stream object status is playing then remove
                     self.remove_live_box(deviceIcon)
@@ -79,9 +83,8 @@ class Multiview(BoxLayout):
         nLiveMin = (self.liveGrid.rows-1)**2 + (self.liveGrid.rows-1)
         if self.liveGrid.nLive <= nLiveMin:
                 self.liveGrid.rows -=1
-                print(self.liveGrid.nLive)
-                print (nLiveMin)
-        print(self.liveGrid.nLive) 
+                print("nLive: "+str(self.liveGrid.nLive))
+                print ("nLiveMin: "+str(nLiveMin))
 
     def stop_icons(self):
         for deviceIcon in self.deviceIcons:
@@ -115,15 +118,25 @@ class Multiview(BoxLayout):
         con = sqlite3.connect(dbName)
         cur = con.cursor()
         cur.execute(sql)
-        # Get device icons and stream objects
+        # # Get device icons and stream objects
+        # Getting reference to manager object
+        manager = App.get_running_app().manager
         for entry in cur:
             deviceID = entry [0]
             deviceName = entry[1]
             deviceUrl = entry [2]
+            deviceNeuralNet = entry [3]
             # Fill device icon list
             self.deviceIcons.append(DeviceIcon(deviceName = deviceName, deviceUrl = deviceUrl, size_hint = (None, 1), width = 185))
             # Fill live stream object list
-            self.liveBoxes.append(LiveBox())
+            if deviceNeuralNet == 1:
+                if not (self.manager.model):
+                    self.manager.activate_vision_ai()
+                if self.manager.model:
+                    self.liveBoxes.append(LiveBox(detector = manager.detector, model = manager.model, model_properties = manager.model_properties, 
+                    dbVectors = manager.dbVectors, fileNames = manager.fileNames))
+            else:
+                self.liveBoxes.append(LiveBox())
         con.close()
         # Add the container to selection box
         for deviceIcon in self.deviceIcons:

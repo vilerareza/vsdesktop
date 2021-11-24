@@ -53,9 +53,7 @@ class DeviceIcon(FloatLayout):
            self.t_status_checker.start()
 
     def check_camera(self):
-        #print ('check device')
         req = UrlRequest(url=(self.deviceUrl+self.request_param_check), on_success = self.callback_ok, timeout=2, on_error = self.callback_fail, on_failure = self.callback_fail)
-        #req = UrlRequest(url=(self.source1+self.request_param_check), on_success = self.callback_ok, timeout=2, on_error = self.callback_fail, on_failure = self.callback_fail)
         
     def check(self):
         while (not self.stop_flag):
