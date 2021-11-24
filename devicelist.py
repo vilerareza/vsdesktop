@@ -31,11 +31,9 @@ class DeviceList (FocusBehavior, CompoundSelectionBehavior, StackLayout):
     def widget_touch_down(self, widget, touch):
         if widget.collide_point(*touch.pos):
             self.select_with_touch(widget, touch)
-            #self.select_node(widget)
-            print("touch down")
     
     def widget_touch_up(self, widget, touch):
-        if not (widget.collide_point(*touch.pos) or self.touch_multiselect):
+        if self.collide_point(*touch.pos) and (not (widget.collide_point(*touch.pos) or self.touch_multiselect)):
             self.deselect_node(widget)
     
     def select_node(self, node):
@@ -45,7 +43,7 @@ class DeviceList (FocusBehavior, CompoundSelectionBehavior, StackLayout):
         node.label.text="[color=ffffff]"+node.deviceName+"[/color]"
         self.selectedDevice = node
         self.isDeviceSelected = True
-        print ('select')
+        print ('Item selected in deviceList')
         return super().select_node(node)
         
     def deselect_node(self, node):
@@ -61,14 +59,15 @@ class DeviceList (FocusBehavior, CompoundSelectionBehavior, StackLayout):
         if len(self.selected_nodes) == 0:
             self.isDeviceSelected = False
             print ('nothing is selected')
-        #return super().deselect_node(node)
     
     def clear_selection(self, widget=None):
         return super().clear_selection()
 
     def on_selected_nodes(self,grid,nodes):
         pass
-
-        
+    
+    def activate_neuralnet_to_selected_device(self, deviceInfo, neuralNetActivated):
+        if self.selectedDevice:
+            self.selectedDevice.neuralNetwork = neuralNetActivated
 
 

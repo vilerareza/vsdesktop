@@ -12,6 +12,7 @@ from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.image import Image
 from kivy.uix.behaviors import ButtonBehavior
+from kivy.uix.switch import Switch
 
 class ColoredBox(BoxLayout):
     def __init__(self, color, **kwargs):
@@ -70,7 +71,7 @@ class TextInputBinded(TextInput):
 class ToggleButtonBinded(ToggleButton): 
     def update_y_position(self, widget, y, offset):
         self.y = y - int(offset)
-    def update_right_position(self, widget, right):
+    def align_right(self, widget, right):
         self.right = right
     def update_x_position(self, widget, x, offset):
         self.x = x + int(offset)
@@ -78,8 +79,6 @@ class ToggleButtonBinded(ToggleButton):
 class ButtonBinded(Button): 
     def update_y_position(self, widget, y, offset):
         self.y = y - int(offset)
-    def update_right_position(self, widget, right):
-        self.right = right
     def update_x_position(self, widget, x, offset):
         self.x = x + int(offset)
     def align_right(self, widget, right):
@@ -95,3 +94,16 @@ class ImageButton (ButtonBehavior, Image):
 class LogoBar (FloatLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+class SwitchBinded(Switch): 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        
+    def update_y_position(self, widget, y, offset):
+        self.y = y - int(offset)
+    def update_x_position(self, widget, x, offset):
+        self.x = x + int(offset)
+    def align_right(self, widget, right):
+        self.right = right
+    def align_top(self, widget, top):
+        self.top = top

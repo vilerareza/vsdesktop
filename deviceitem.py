@@ -15,8 +15,9 @@ class DeviceItem(FloatLayout):
     image = ObjectProperty(None)
     label = ObjectProperty(None)
     color = ObjectProperty((0,0,0))
+    neuralNetwork = NumericProperty(0)
 
-    def __init__(self, deviceID, deviceName, deviceUrl, imagePath, **kwargs):
+    def __init__(self, deviceID, deviceName, deviceUrl, imagePath, neuralNetwork, **kwargs):
         super().__init__(**kwargs)
         #self.orientation = 'vertical'
         self.padding = [10]
@@ -24,6 +25,7 @@ class DeviceItem(FloatLayout):
         self.deviceID = deviceID
         self.deviceName = deviceName
         self.deviceUrl = deviceUrl
+        self.neuralNetwork = neuralNetwork
         self.image = Image (source=imagePath, size_hint = (1,1), pos_hint = {'center_x':0.5, 'center_y':0.5})
         self.label = ColorLabel(text="[color=dddddd]"+deviceName+"[/color]", font_size = 16, font_family = "arial", halign = "center", valign = "top", size_hint = (None, None), size = (80,25), pos_hint = {'center_x':0.5, 'top': 1}, markup = True)
         #self.deviceLabel = Label(text = "", font_size = 18, font_family = "arial", halign = 'center', valign = 'middle', size_hint = (None, None), size = (120,40), pos_hint = {'center_x':0.5, 'center_y': 0.5}

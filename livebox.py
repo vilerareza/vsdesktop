@@ -13,9 +13,13 @@ class LiveBox(FloatLayout):
     status = StringProperty("stop")
     captureButton = ObjectProperty(None)
 
-    def __init__(self, **kwargs):
+    def __init__(self, detector = None, model = None, model_properties = None, dbVectors = None, fileNames = None, **kwargs):
         super().__init__(**kwargs)
-        self.liveStream = LiveStream(pos_hint={'center_x':0.5, 'center_y': 0.5}, size_hint = (None, None), size = (640, 480))
+        # Initialize liveStream
+        self.liveStream = LiveStream(detector = detector, model = model, 
+        model_properties = model_properties, dbVectors = dbVectors, fileNames = fileNames,
+        pos_hint={'center_x':0.5, 'center_y': 0.5}, size_hint = (None, None), size = (640, 480))
+        
         self.captureButton = ButtonBinded (text = "Capture", size_hint = (None, None), size = (80, 40))#, pos_hint = {'top': 1, 'right': 1})
         self.captureButton.bind(on_press = self.capture)
         # Align button to video
@@ -39,8 +43,9 @@ class LiveBox(FloatLayout):
             self.remove_widget(self.liveStream)
             self.remove_widget(self.captureButton)
             self.status = "stop"
-        except:
+        except Exception as e:
             print ("Error to stop live stream...")
+            print (e)
 
     def capture(self, button):
         self.liveStream.texture.save("test.png", flipped = False)
