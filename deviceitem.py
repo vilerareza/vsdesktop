@@ -26,7 +26,7 @@ class DeviceItem(FloatLayout):
         self.deviceName = deviceName
         self.deviceUrl = deviceUrl
         self.neuralNetwork = neuralNetwork
-        self.image = Image (source=imagePath, size_hint = (1,1), pos_hint = {'center_x':0.5, 'center_y':0.5})
+        self.image = Image (source=imagePath, mipmap = True, size_hint = (1,1), pos_hint = {'center_x':0.5, 'center_y':0.5})
         self.label = ColorLabel(text="[color=dddddd]"+deviceName+"[/color]", font_size = 16, font_family = "arial", halign = "center", valign = "top", size_hint = (None, None), size = (80,25), pos_hint = {'center_x':0.5, 'top': 1}, markup = True)
         #self.deviceLabel = Label(text = "", font_size = 18, font_family = "arial", halign = 'center', valign = 'middle', size_hint = (None, None), size = (120,40), pos_hint = {'center_x':0.5, 'center_y': 0.5}
         self.add_widget (self.image)

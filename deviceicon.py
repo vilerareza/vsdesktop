@@ -1,13 +1,11 @@
-import random
 import threading
 from kivy.network.urlrequest import UrlRequest
-from kivy.graphics import Color, Rectangle
 from kivy.metrics import dp
-from kivy.uix.label import Label
 from kivy.uix.floatlayout import FloatLayout
 from kivy.properties import ObjectProperty, StringProperty, BooleanProperty
+from kivy.lang import Builder
 
-from deviceiconimage import IconImage
+Builder.load_file('deviceIcon.kv')
 
 class DeviceIcon(FloatLayout):
     statusImage = ObjectProperty(None)
@@ -27,23 +25,6 @@ class DeviceIcon(FloatLayout):
         super().__init__(**kwargs)
         self.deviceName = deviceName
         self.deviceUrl = deviceUrl
-        self.statusImage = IconImage(deviceName = self.deviceName, deviceUrl = self.deviceUrl)
-        self.statusImage.source = "images/connecting.png"
-        self.deviceLabel = Label(text = "", font_size = 18, font_family = "arial", halign = 'center', valign = 'middle', size_hint = (None, None), size = (120,40), pos_hint = {'center_x':0.5, 'center_y': 0.5}, markup = True)
-        #Add widgets
-        self.add_widget(self.statusImage)
-        self.add_widget(self.deviceLabel)
-    #     with self.canvas.before:
-    #         self.r = random.random()
-    #         self.g = random.random()
-    #         self.b = random.random()
-    #         Color(self.r,self.g,self.b)
-    #         self.rect = Rectangle (pos=self.pos, size = self.size)
-    #         self.bind (pos = self.update_rect, size = self.update_rect)
-
-    # def update_rect(self, *args):
-    #     self.rect.pos = self.pos
-    #     self.rect.size = self.size
 
     def start_status_checker(self):
         #Start the status checker thread
@@ -71,15 +52,14 @@ class DeviceIcon(FloatLayout):
         #print ("callback OK is called")
         # Enable the item
         self.isEnabled = True
-        self.statusImage.source = "images/play3.png"
+        self.statusImage.source = "images/play.png"
         self.deviceLabel.text = "[color=cccccc]"+self.deviceName+"[/color]"
         
     def callback_fail(self,request, result):
         #print('callback fail called')
         # Disable the frame
         #self.isEnabled = False
-        #self.statusImage.source = "images/play.png"
-        self.statusImage.source = "images/stop2.png"
+        self.statusImage.source = "images/play.png"
         self.deviceLabel.text = "[color=777777]"+self.deviceName+"[/color]"
 
     def stop(self):

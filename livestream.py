@@ -5,10 +5,14 @@ from functools import partial
 
 import numpy as np
 from cv2 import imdecode, resize
+
+from kivy.lang import Builder
 from kivy.graphics import Color, Line
 from kivy.graphics.texture import Texture
 from kivy.uix.video import Video
 from kivy.uix.label import Label
+
+Builder.load_file('livestream.kv')
 
 class LiveStream(Video):
 
@@ -44,18 +48,19 @@ class LiveStream(Video):
     def _on_video_frame(self, *largs):
         super()._on_video_frame(*largs)
         # Adjust size according to texture size ?????
-        self.size = self.texture.size
-        if self.processThisFrame:
-            data = io.BytesIO()
-            self.texture.save(data, flipped = False, fmt = 'png')
-            if self.t_process_frame is None:
-                self.t_process_frame = threading.Thread(target = partial(self.process_frame, data))
-                self.t_process_frame.start()
-        self.frameCount +=1
-        if self.frameCount > 20:
-            self.frameCount =0
-            self.clear_widgets()
-            self.canvas.after.clear()
+        if self.model:
+            self.size = self.texture.size
+            if self.processThisFrame:
+                data = io.BytesIO()
+                self.texture.save(data, flipped = False, fmt = 'png')
+                if self.t_process_frame is None:
+                    self.t_process_frame = threading.Thread(target = partial(self.process_frame, data))
+                    self.t_process_frame.start()
+            self.frameCount +=1
+            if self.frameCount > 20:
+                self.frameCount =0
+                self.clear_widgets()
+                self.canvas.after.clear()
 
     def process_frame(self, data):
         self.processThisFrame = False

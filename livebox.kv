@@ -1,0 +1,20 @@
+#: import livestream livestream
+#: import liveactionbar liveactionbar
+
+<LiveBox>:
+    size_hint: None, None
+    liveStream : live_stream
+
+    LiveStream:
+        id : live_stream
+        pos_hint : {'center_x':0.5, 'center_y': 0.5}
+        size_hint :(None, None) 
+        size : (640, 360) 
+        allow_stretch : True
+
+    LiveActionBar:
+        size_hint : None, None
+        width : live_stream.width * 0.7
+        height : live_stream.height * 0.1
+        pos_hint: {'center_x' : 0.5}
+        y : live_stream.y

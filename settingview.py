@@ -124,7 +124,7 @@ class SettingView(BoxLayout):
             deviceName = entry[1]
             deviceUrl = entry [2]
             deviceNeuralNet = entry [3]
-            imagePath = "images/device2.png"
+            imagePath = "images/not_device_selected5.png"
             self.devices.append(DeviceItem(deviceID = deviceID, deviceName = deviceName, deviceUrl = deviceUrl, neuralNetwork = deviceNeuralNet, imagePath=imagePath, size_hint = (None, None), size = (95,85)))
         con.close()
 

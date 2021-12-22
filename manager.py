@@ -1,25 +1,21 @@
 import os
-import time
 
 from kivy.lang import Builder
-from kivy.metrics import dp
 from kivy.properties import ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.image import Image
-from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelItem
-from kivy.graphics import Color, Rectangle
-
-from mylayoutwidgets import LogoBar
-from settingview import SettingView
-from multiview import Multiview
+from kivy.metrics import dp
 
 import numpy as np
 from cv2 import CascadeClassifier, imread, resize
 from openvino.inference_engine import IECore
 
+Builder.load_file('manager.kv')
+
 class Manager(BoxLayout):
 
+    headerBar = ObjectProperty(None)
+    mainTabs = ObjectProperty (None)
+    
     detector = None
     model = None
     modelLocation = "E:/testimages/facetest/vggface/ir/saved_model.xml"
@@ -28,24 +24,39 @@ class Manager(BoxLayout):
     fileNames=[]
     dbVectors=[]
     model_properties = []
-
-    tabs = ObjectProperty
+    newTabs = []
     
     orientation = "vertical"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # Logo bar
-        self.logoBar = LogoBar(size_hint = (1,None), height = 30)
-        # Adding image, original size is 300x78
-        self.logoBar.add_widget(Image(source = "images/vs_logo2.png", pos_hint = {'left': 1, 'top': 1}, size_hint = (None, 1), width = 130))
-        self.add_widget(self.logoBar)
-        # Adding Tabs Panel
-        self.tabs = VsDesktopTabs()
-        self.add_widget(self.tabs)
-    
+        self.move_main_tabs()
+
+    def move_main_tabs(self):
+        ''' Move main tabs to header bar'''
+        # Copy the original tabs
+        self.newTabs = self.mainTabs.tab_list.copy()
+        # Remove the original tabs
+        self.mainTabs.clear_tabs()
+        self.mainTabs.tab_height = 0
+        # Put the copy of original tabs in the 
+        for newTab in reversed(self.newTabs):
+            # Styling
+            if newTab == self.mainTabs.ids.id_tab_setting_view:
+                newTab.size_hint = (None, None)
+                newTab.size = (dp(60), dp(40))
+                newTab.background_normal = 'images/tab_setting_normal.png'
+                newTab.background_down = 'images/tab_setting_down.png'
+                self.headerBar.tabStrip.add_widget(newTab)
+            elif newTab == self.mainTabs.ids.id_tab_multi_view:
+                newTab.size_hint = (None, None)
+                newTab.size = (dp(60), dp(40))
+                newTab.background_normal = 'images/tab_multiview_normal.png'
+                newTab.background_down = 'images/tab_multiview_down.png'
+                self.headerBar.tabStrip.add_widget(newTab)
+
     def stop(self):
-        self.tabs.stop()
+        self.mainTabs.stop()
 
     def activate_vision_ai(self):
         # Face detector
@@ -107,37 +118,3 @@ class Manager(BoxLayout):
             dBvectors.append(vector)
         
         return filePaths, fileNames, dBvectors
-
-
-class VsDesktopTabs(TabbedPanel):
-    multiView = ObjectProperty()
-    settingView = ObjectProperty()
-    tabMultiView = ObjectProperty()
-    tabSettingView = ObjectProperty()
-
-    do_default_tab = False
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.multiView = Multiview()
-        self.settingView = SettingView()
-        self.tabSettingView = TabbedPanelItem(content = self.settingView, text = "Settings")
-        self.tabMultiView = TabbedPanelItem(content = self.multiView, text = "Multiview")
-        self.add_widget(self.tabSettingView)
-        self.add_widget(self.tabMultiView)
-        self.tabSettingView.bind(on_press=self.tabSettingViewPressed)
-        self.tabMultiView.bind(on_press=self.refreshMultiView)
-    
-    def tabSettingViewPressed(self, tab):
-        if tab.state == "down":
-            # Stop the multiview
-            self.multiView.stop()
-    
-    def refreshMultiView(self, tab):
-        if tab.state == "down":
-            # Refresh the device list
-            self.multiView.get_items_from_db()
-            self.multiView.start_icons()
-            
-    def stop(self):
-        self.multiView.stop()

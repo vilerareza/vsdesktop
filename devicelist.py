@@ -38,7 +38,7 @@ class DeviceList (FocusBehavior, CompoundSelectionBehavior, StackLayout):
     
     def select_node(self, node):
         #node.color = (0,1,0)
-        node.image.source = 'images/device_selected4.png'
+        node.image.source = 'images/device_selected7.png'
         node.label.font_size = 16
         node.label.text="[color=ffffff]"+node.deviceName+"[/color]"
         self.selectedDevice = node
@@ -49,7 +49,7 @@ class DeviceList (FocusBehavior, CompoundSelectionBehavior, StackLayout):
     def deselect_node(self, node):
         super().deselect_node(node)
         #node.color = (0,0,0)
-        node.image.source = 'images/device2.png'
+        node.image.source = 'images/not_device_selected5.png'
         node.label.font_size = 16
         node.label.text="[color=cccccc]"+node.deviceName+"[/color]"
         # Check if nothing is selected
