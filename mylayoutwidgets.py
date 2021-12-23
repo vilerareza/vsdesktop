@@ -13,6 +13,7 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.image import Image
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.switch import Switch
+from kivymd.uix.floatlayout import MDFloatLayout
 
 class ColoredBox(BoxLayout):
     def __init__(self, color, **kwargs):
@@ -26,7 +27,7 @@ class ColoredBox(BoxLayout):
         self.rect.pos = self.pos
         self.rect.size = self.size
 
-class ColorFloatLayout(FloatLayout):
+class ColorFloatLayout(MDFloatLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         with self.canvas.before:

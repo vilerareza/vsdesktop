@@ -1,4 +1,3 @@
-from kivy.core.window import Window
 from kivy.lang import Builder
 from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.floatlayout import FloatLayout
@@ -9,9 +8,10 @@ from mylayoutwidgets import ColorFloatLayout
 
 Builder.load_file('livebox.kv')
 
-class LiveBox(FloatLayout):
+class LiveBox(ColorFloatLayout, HoverBehavior):
 
     liveStream = ObjectProperty(None)
+    liveActionBar = ObjectProperty(None)
     status = StringProperty("stop")
 
     def __init__(self, detector = None, model = None, model_properties = None, dbVectors = None, fileNames = None, **kwargs):
@@ -25,11 +25,13 @@ class LiveBox(FloatLayout):
     #     if self.collide_point(*mouse_pos):
     #         print ('some motion')
 
-    # def on_enter(self, *args):
-    #     print ('ENTER')
+    def on_enter(self, *args):
+        self.liveActionBar.opacity  = 0.7
+        print ('ENTER')
 
-    # def on_leave(self, *args):
-    #     print ('LEAVE')
+    def on_leave(self, *args):
+        self.liveActionBar.opacity  = 0
+        print ('LEAVE')
 
     def set_live_stream (self, detector, model, model_properties, dbVectors, fileNames):
         self.liveStream.detector = detector
@@ -58,7 +60,6 @@ class LiveBox(FloatLayout):
 
     def adjust_self_size(self, size):
         self.size = size
-        print (f'livebox size: {self.size}')
         self.adjust_livestream_size(size)
 
     def adjust_livestream_size(self, size):

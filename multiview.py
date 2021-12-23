@@ -1,10 +1,11 @@
 from kivy.lang import Builder
-from kivy.core.window import Window
 from kivy.properties import ListProperty, ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
 from deviceicon import DeviceIcon
 from livebox import LiveBox
 import sqlite3
+
+from livegridlayout import LiveGridLayout
 
 Builder.load_file("multiview.kv")
 
@@ -32,13 +33,11 @@ class Multiview(BoxLayout):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        print (f'TYPE GRID {type(self.liveGrid)}')
+        self.liveGrid = LiveGridLayout (size_hint = (1,1), rows=1, cols=1, spacing = 5)
+        self.liveGrid.bind(size = self.adjust_livebox_size)
+        self.add_widget(self.liveGrid)
         # Get devices
         #self.get_items_from_db()
-    #     Window.bind(on_resize=self.on_resize)
-    
-    # def on_resize(self, *args):
-    #     print ('RESIZE')
 
     def icon_touch_action(self, deviceIcon, touch):
         if deviceIcon.collide_point(*touch.pos):
@@ -50,7 +49,6 @@ class Multiview(BoxLayout):
                     # If the live stream object status is playing then remove
                     self.remove_live_box(deviceIcon)
             
-
     def show_live_box(self, deviceIcon):
         # Start the live steaming object
         # if (deviceIcon.deviceName == "Device 1" or deviceIcon.deviceName == "Device 2"):
@@ -89,8 +87,10 @@ class Multiview(BoxLayout):
             self.adjust_livebox_size()
         print (f'ROWS : {self.liveGrid.rows} COLS : {self.liveGrid.cols}')
 
-    def adjust_livebox_size(self):
-        print (f'LIVEGRID SIZE : {str(self.liveGrid.size)}')
+    def on_maximize(self, *args):
+        print (self.liveGrid.width)
+
+    def adjust_livebox_size(self, *args):
         cell_width = int((self.liveGrid.width - self.liveGrid.spacing[0]*(self.liveGrid.cols-1))/
                     self.liveGrid.cols)
         cell_height = int((self.liveGrid.height - self.liveGrid.spacing[0]*(self.liveGrid.rows-1))/

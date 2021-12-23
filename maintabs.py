@@ -1,5 +1,5 @@
 from kivy.lang import Builder
-from kivy.metrics import dp
+from kivy.core.window import Window
 from kivy.properties import ObjectProperty
 from kivy.uix.tabbedpanel import TabbedPanel
 
