@@ -14,16 +14,9 @@ class LiveBox(ColorFloatLayout, HoverBehavior):
     liveActionBar = ObjectProperty(None)
     status = StringProperty("stop")
 
-    def __init__(self, detector = None, model = None, model_properties = None, dbVectors = None, fileNames = None, **kwargs):
+    def __init__(self, model = None, **kwargs):
         super().__init__(**kwargs)
-        self.set_live_stream (detector, model, model_properties, dbVectors, fileNames) 
-        #Window.bind(mouse_pos=self.on_motion)
-    
-    # def on_motion(self, window, mouse_pos):
-    #     print (str(mouse_pos))
-    #     # will receive all motion events.
-    #     if self.collide_point(*mouse_pos):
-    #         print ('some motion')
+        self.set_live_stream (model) 
 
     def on_enter(self, *args):
         self.liveActionBar.opacity  = 0.7
@@ -33,12 +26,8 @@ class LiveBox(ColorFloatLayout, HoverBehavior):
         self.liveActionBar.opacity  = 0
         print ('LEAVE')
 
-    def set_live_stream (self, detector, model, model_properties, dbVectors, fileNames):
-        self.liveStream.detector = detector
-        self.liveStream.model = model
-        self.liveStream.model_properties = model_properties
-        self.liveStream.dbVectors = dbVectors
-        self.liveStream.fileNames = fileNames
+    def set_live_stream (self, model):
+        self.liveStream.aiModel = model
 
     def start_live_stream (self, source):
         try:
@@ -66,7 +55,7 @@ class LiveBox(ColorFloatLayout, HoverBehavior):
         factor1 = size[0] / self.liveStream.width
         factor2 = size[1] / self.liveStream.height
         factor = min(factor1, factor2)
-        target_size = (int(self.liveStream.width * factor), int(self.liveStream.height * factor))
+        target_size = ((self.liveStream.width * factor), (self.liveStream.height * factor))
         self.liveStream.size = target_size     
 
     def capture_image(self):

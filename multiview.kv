@@ -1,7 +1,7 @@
 #: import livegridlayout livegridlayout
 
 <Multiview>:
-    #liveGrid : live_grid_layout
+    liveGrid : live_grid_layout
     selectionBox : selection_box
     selectionScroll : selection_scroll
     selectionNextButton : selection_next_button
@@ -9,12 +9,12 @@
     orientation : 'vertical'
     manager: app.manager
 
-    #LiveGridLayout:     # Main layout for lives
-    #    size_hint : (1,1)
-    #    id : live_grid_layout
-    #    rows : 1
-    #    cols : 1
-    #    spacing : 5
+    LiveGridLayout:     # Main layout for lives
+        size_hint : (1,1)
+        id : live_grid_layout
+        rows : 1
+        cols : 1
+        spacing : 5
 
     FloatLayout:
         size_hint : (1, None)

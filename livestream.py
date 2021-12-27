@@ -17,39 +17,33 @@ Builder.load_file('livestream.kv')
 class LiveStream(Video):
 
     # Vision AI
-    detector = None
-    model = None
-    model_properties = []
-    dbVectors = []
-    # Label
-    fileNames = []
-
+    aiModel = None
     processThisFrame = True
     t_process_frame = None
     target_size = (224, 224, 3)
+    bboxFactor = 0
     frameCount = 0
+    streamSize = (640,480)
 
-    def __init__(self, detector = None, model = None, model_properties = None, dbVectors = None, fileNames = None, **kwargs):
+    def __init__(self, model = None, **kwargs):
         super().__init__(**kwargs)
         self.state = "stop"
         self.source = ""
         self.texture = Texture.create()
-        # Detector
-        self.detector = detector
-        # Neural network model
-        self.model = model
-        self.model_properties = model_properties
-        # Database vectors
-        self.dbVectors = dbVectors
-        # Database label
-        self.fileNames = fileNames
+        # Vision AI Model
+        self.aiModel = model
+        self.bind(size = self.calculate_bbox_factor)
+
+    def calculate_bbox_factor(self, *args):
+        factor1 = self.width / self.streamSize[0]
+        factor2 = self.height / self.streamSize[1]
+        self.bboxFactor = min(factor1, factor2)
 
     # Video Frame Event Function
     def _on_video_frame(self, *largs):
         super()._on_video_frame(*largs)
         # Adjust size according to texture size ?????
-        if self.model:
-            self.size = self.texture.size
+        if self.aiModel:
             if self.processThisFrame:
                 data = io.BytesIO()
                 self.texture.save(data, flipped = False, fmt = 'png')
@@ -67,26 +61,29 @@ class LiveStream(Video):
         buff = np.asarray(bytearray(data.read()))
         img = imdecode(buff, 1)
         # # Face detection 
-        bboxes = self.detector.detectMultiScale(img)
+        bboxes = self.aiModel.detector.detectMultiScale(img)
         if len(bboxes)>0:
-            # # Preprocessing
-            faces = self.process_face(img, bboxes)
             # # Recognition
-            vectors = self.predict(faces, self.model, self.model_properties)
-            # # Find face label
-            if vectors:
-                faceLabels = self.find_face_label(vectors, self.dbVectors, self.fileNames)
-                # # Bounding boxes drawing
-                self.clear_widgets()
-                self.canvas.after.clear()
-                for i in range(len(bboxes)):
-                    xb, yb, width, height = bboxes[i]
-                    label = Label(text = faceLabels[i], font_size = 16, font_family = "arial", halign = 'left', valign = 'middle', color = (0,0.4,1), size_hint = (None, None), size = (100, 40), x = self.x+int(xb), y = self.y+(self.height-int(yb)))
-                    self.add_widget(label)
-                    with self.canvas.after:
-                        #Color (0,0.69,0.31, 0.9)
-                        Color (0,0.64,0.91, 1.0)
-                        Line(rectangle = (self.x+xb, self.y+(self.height-yb), width, -height), width = 1.5)
+            # Check if recognition is True
+            if self.aiModel.classifier:
+                 # # Preprocessing
+                #faces = self.process_face(img, bboxes)
+                # # Find face label
+                label = self.predict()
+            # # Bounding boxes drawing
+            # self.clear_widgets()
+            self.canvas.after.clear()
+            for i in range(len(bboxes)):
+                #xb, yb, width, height = bboxes[i]
+                #print (f'ORIGINAL : Xb {xb}, Yb {yb}, width {width}, height {height}')
+                xb, yb, width, height = bboxes[i]*self.bboxFactor
+                print (f'BBOX FACTOR {self.bboxFactor}, self width {self.width}, {self.height}, Texture Width {self.texture.width},{self.texture.height} Xb {xb}, Yb {yb}, width {width}, height {height}')
+                #label = Label(text = faceLabels[i], font_size = 16, font_family = "arial", halign = 'left', valign = 'middle', color = (0,0.4,1), size_hint = (None, None), size = (100, 40), x = self.x+int(xb), y = self.y+(self.height-int(yb)))
+                #self.add_widget(label)
+                with self.canvas.after:
+                    #Color (0,0.69,0.31, 0.9)
+                    Color (0,0.64,0.91, 1.0)
+                    Line(rectangle = (self.x+xb, self.y+(self.height-yb), width, -height), width = 1.5)
         self.processThisFrame = True
         self.t_process_frame = None
 
@@ -110,33 +107,16 @@ class LiveStream(Video):
         return faces
 
     def predict (self, faces, model, model_properties=None):
-        try:
-            vectors = []
-            for face in faces:
-                #vector = model.predict(face)[0]#.tolist()
-                result = model.infer({model_properties[0]: face})
-                output = result[model_properties[1]]
-                vector = output[0]
-                vectors.append(vector)
-            return vectors
-        except Exception as e:
-            print ("Something happen during predict")
-            print (e)
-    
-    def findDistances(self, sampleVector, vectors):
-        distances = []
-        for vector in vectors:
-            # Euclidean distance
-            distance = sum(np.power((sampleVector - vector), 2))
-            distance = np.sqrt(distance)
-            distances.append(distance)
-        return distances
-
-    def find_face_label(self, faceVectors, dbVectors, nameLabel):
-        faceLabels = []
-        for vector in faceVectors:
-            distances = self.findDistances(vector, dbVectors)
-            # faceLabel as a shortest distance
-            faceLabel = nameLabel[np.argmin(distances)]
-            faceLabels.append(faceLabel)
-        return faceLabels
+        pass
+        # try:
+        #     vectors = []
+        #     for face in faces:
+        #         #vector = model.predict(face)[0]#.tolist()
+        #         result = model.infer({model_properties[0]: face})
+        #         output = result[model_properties[1]]
+        #         vector = output[0]
+        #         vectors.append(vector)
+        #     return vectors
+        # except Exception as e:
+        #     print ("Something happen during predict")
+        #     print (e)

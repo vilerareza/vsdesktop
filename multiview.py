@@ -1,10 +1,11 @@
+import sqlite3
+
 from kivy.lang import Builder
 from kivy.properties import ListProperty, ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
+
 from deviceicon import DeviceIcon
 from livebox import LiveBox
-import sqlite3
-
 from livegridlayout import LiveGridLayout
 
 Builder.load_file("multiview.kv")
@@ -26,16 +27,18 @@ class Multiview(BoxLayout):
     selectionNextButton = ObjectProperty(None)
     selectionBackButton = ObjectProperty(None)
     selectionInterval = 4
-
-    testUrl = "images/test.mp4"
-
+    # Database
     db = ObjectProperty({'dbName': 'test.db', 'tableName': 'camera'})
+    # Vision AI Model
+    aiModel = None
+    # test stream url
+    testUrl = "images/test.mp4"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.liveGrid = LiveGridLayout (size_hint = (1,1), rows=1, cols=1, spacing = 5)
+        #self.liveGrid = LiveGridLayout (size_hint = (1,1), rows=1, cols=1, spacing = 5)
         self.liveGrid.bind(size = self.adjust_livebox_size)
-        self.add_widget(self.liveGrid)
+        #self.add_widget(self.liveGrid)
         # Get devices
         #self.get_items_from_db()
 
@@ -52,7 +55,7 @@ class Multiview(BoxLayout):
     def show_live_box(self, deviceIcon):
         # Start the live steaming object
         # if (deviceIcon.deviceName == "Device 1" or deviceIcon.deviceName == "Device 2"):
-        #     self.liveBoxes[self.deviceIcons.index(deviceIcon)].start_live_stream(deviceIcon.deviceUrl+"?start")                    
+        #self.liveBoxes[self.deviceIcons.index(deviceIcon)].start_live_stream(deviceIcon.deviceUrl+"?start")                    
         # else:
         self.liveBoxes[self.deviceIcons.index(deviceIcon)].start_live_stream(self.testUrl)
         # Adjust live grid row and cols for displaying live stream #
@@ -87,16 +90,14 @@ class Multiview(BoxLayout):
             self.adjust_livebox_size()
         print (f'ROWS : {self.liveGrid.rows} COLS : {self.liveGrid.cols}')
 
-    def on_maximize(self, *args):
-        print (self.liveGrid.width)
-
     def adjust_livebox_size(self, *args):
-        cell_width = int((self.liveGrid.width - self.liveGrid.spacing[0]*(self.liveGrid.cols-1))/
+        cell_width = ((self.liveGrid.width - self.liveGrid.spacing[0]*(self.liveGrid.cols-1))/
                     self.liveGrid.cols)
-        cell_height = int((self.liveGrid.height - self.liveGrid.spacing[0]*(self.liveGrid.rows-1))/
+        cell_height = ((self.liveGrid.height - self.liveGrid.spacing[0]*(self.liveGrid.rows-1))/
                     self.liveGrid.rows)
         for livebox in self.liveBoxes:
             livebox.adjust_self_size(size = (cell_width, cell_height))
+        #print (f'GRID SIZE {self.liveGrid.size}, CELL SIZE {cell_width}, {cell_height}')
 
     def stop_icons(self):
         for deviceIcon in self.deviceIcons:
@@ -135,6 +136,7 @@ class Multiview(BoxLayout):
         con.close()
 
     def create_deviceicon_livebox(self, db_cursor):
+        # Read every entry in database
         for entry in db_cursor:
             deviceID = entry [0]
             deviceName = entry[1]
@@ -142,17 +144,29 @@ class Multiview(BoxLayout):
             deviceNeuralNet = entry [3]
             # Fill device icon list
             self.deviceIcons.append(DeviceIcon(deviceName = deviceName, deviceUrl = deviceUrl, size_hint = (None, None), size = (181, 45)))
-            # Fill live stream object list
+            # Fill live box object list
             if deviceNeuralNet == 1:
-                if not (self.manager.model):
-                    self.manager.activate_vision_ai()
-                if self.manager.model:
-                    self.liveBoxes.append(LiveBox(detector = self.manager.detector, model = self.manager.model, model_properties = self.manager.model_properties, 
-                    dbVectors = self.manager.dbVectors, fileNames = self.manager.fileNames))
+                # If device neural net is activated then activate the Vision AI
+                if not (self.aiModel):
+                    self.aiModel = self.create_vision_ai()
+                if self.aiModel:
+                    # Create livebox with detector and model
+                    self.liveBoxes.append(LiveBox(model = self.aiModel))
+                else:
+                    print ('Model not exist')
             else:
+                # If device neural net is not activate then create livebox without detector and model
                 self.liveBoxes.append(LiveBox())
         # Add deviceIcon content to selection box
         self.add_deviceicon_to_selectionbox(item_list = self.deviceIcons, container = self.selectionBox)
+
+    def create_vision_ai(self):
+        try:
+            from ai_model import AIModel
+            model = AIModel()
+            return model
+        except Exception as e:
+            print (f'Error on activating Vision AI {e}')
 
     def add_deviceicon_to_selectionbox(self, item_list, container):
         for item in item_list:
