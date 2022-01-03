@@ -1,0 +1,60 @@
+#:import rgba kivy.utils.get_color_from_hex
+
+<AttendanceLayout>:
+    rightBox : right_box
+    orientation: 'horizontal'
+
+    BoxLayout:
+        id: left_box
+        orientation: 'vertical'
+        size_hint: (0.1, 1)
+        canvas:
+            Color:
+                rgb: 0.3, 0.3, 0.3
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        FloatLayout:
+            RoundedButton:
+                id: all_data
+                text: 'All data'
+                # background_color: [1, 0, 1, 0.6]
+                size_hint: (0.8, None)
+                height: 40
+                pos_hint: {'center_x': 0.5, 'center_y': 0.95}
+                on_press: root.show_all()
+
+            RoundedButton:
+                id: person
+                text: 'Person'
+                # background_color: [1, 0, 1, 0.6]
+                size_hint: (0.8, None)
+                height: 40
+                pos_hint: {'center_x': 0.5}
+                y: all_data.y - dp(48)
+                on_press: root.show_person()
+
+    BoxLayout:
+        id: right_box
+        orientation: 'vertical'
+        size_hint: (0.9, 1)
+        canvas:
+            Color:
+                rgb: 0.5, 0.5, 0.5
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+<RoundedButton@Button>:
+    background_color: [0, 0, 0, 0]
+    canvas.before:
+        Color:
+            id: button_color
+            rgb: rgba('#2aa3e2')
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [15]
+
+

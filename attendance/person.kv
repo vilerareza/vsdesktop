@@ -1,0 +1,101 @@
+#:import rgba kivy.utils.get_color_from_hex
+
+<PersonList>:
+    personListLayout: person_list
+    chooseButton: choose_button
+    dropPerson: drop_person
+    profileCard: profile_card
+    profileCardBox: profile_card_box
+    profilePicture: profile_picture
+    nameLabel: name_label
+    jobLabel: job_label
+    summaryBox: summary_box
+    bottomBox: bottom_box
+    id: person_list
+    orientation: 'vertical'
+
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint: (1, 0.4)
+        FloatLayout:
+            id: profile_card_box
+            size_hint: (0.2, 1)
+            ProfileCard:
+                id: profile_card
+                padding: 16
+                size_hint: 0.85, 0.85
+                radius: [15]
+                md_bg_color: rgba('#2aa3e2')
+                pos_hint : {'center_y': 0.5, 'center_x': 0.5}
+                x: root.x + 30
+
+                BoxLayout:
+                    orientation: 'vertical'
+                    FloatLayout:
+                        id: profile_picture
+                        pict: 'images/temp/profile/User.png'
+                        canvas:
+                            Color:
+                                rgb: 1, 1, 1
+                            Ellipse:
+                                pos: self.center_x - 65, self.center_y - 60
+                                size: 130, 130
+                                source: self.pict
+                                angle_start: 0
+                                angle_end: 360
+
+                    Label:
+                        id: name_label
+                        text: 'Calum Hood'
+                        bold: True
+                        size_hint: 1, 0.15
+                        pos_hint: {'center_y': 0.5, 'center_x': 0.5}
+
+                    Label:
+                        id: job_label
+                        text: 'Guitarist'
+                        size_hint: 1, 0.15
+                        pos_hint: {'center_y': 0.5, 'center_x': 0.5}
+
+        BoxLayout:
+            id: detail_box
+            orientation: 'vertical'
+            size_hint: 0.8, 1                
+            FloatLayout:
+                size_hint: (1, 0.175)
+                RoundedButton:
+                    id: choose_button
+                    text: 'Choose Person'
+                    size_hint: (None, None)
+                    height: 30
+                    width: 150
+                    pos_hint: {'right': 0.98, 'center_y': 0.5}
+                    on_press: root.drop_name()
+                    on_release: drop_person.open(self)
+
+                DropDown:
+                    id: drop_person
+                    max_height: dp(120)
+            
+            BoxLayout:
+                id: summary_box
+                orientation: 'vertical'
+                size_hint: 1, 0.7
+                
+            BoxLayout:
+                id: space_box
+                orientation: 'horizontal'
+                size_hint: 1, 0.125
+
+    BoxLayout:
+        id: bottom_box
+        orientation: 'horizontal'
+        size_hint: 1, 0.6
+        
+
+<ProfileCard@MDCard+RoundedRectangularElevationBehavior>:
+    
+
+
+
+

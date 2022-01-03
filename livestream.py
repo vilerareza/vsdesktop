@@ -11,6 +11,9 @@ from kivy.graphics import Color, Line
 from kivy.graphics.texture import Texture
 from kivy.uix.video import Video
 from kivy.uix.label import Label
+from kivy.properties import ObjectProperty
+
+from attendance.attendanceLayout import AttendanceLayout
 
 Builder.load_file('livestream.kv')
 
@@ -18,12 +21,14 @@ class LiveStream(Video):
 
     # Vision AI
     aiModel = None
+    classes = None
     processThisFrame = True
     t_process_frame = None
     target_size = (224, 224, 3)
     bboxFactor = 0
     frameCount = 0
     streamSize = (640,480)
+    attendanceList = ObjectProperty(None)
 
     def __init__(self, model = None, **kwargs):
         super().__init__(**kwargs)
@@ -32,6 +37,8 @@ class LiveStream(Video):
         self.texture = Texture.create()
         # Vision AI Model
         self.aiModel = model
+        self.face = ""
+        self.attendanceList = AttendanceLayout()
         self.bind(size = self.calculate_bbox_factor)
 
     def calculate_bbox_factor(self, *args):
@@ -65,25 +72,29 @@ class LiveStream(Video):
         if len(bboxes)>0:
             # # Recognition
             # Check if recognition is True
+            print(f'classifier {self.aiModel.classifier}')
             if self.aiModel.classifier:
                  # # Preprocessing
-                #faces = self.process_face(img, bboxes)
+                faces = self.process_face(img, bboxes)
                 # # Find face label
-                label = self.predict()
+                labels = self.predict(faces, self.aiModel.classifier)
+                self.attendanceList.add_data(faces, labels)
+
             # # Bounding boxes drawing
-            # self.clear_widgets()
+            self.clear_widgets()
             self.canvas.after.clear()
             for i in range(len(bboxes)):
                 #xb, yb, width, height = bboxes[i]
                 #print (f'ORIGINAL : Xb {xb}, Yb {yb}, width {width}, height {height}')
                 xb, yb, width, height = bboxes[i]*self.bboxFactor
                 print (f'BBOX FACTOR {self.bboxFactor}, self width {self.width}, {self.height}, Texture Width {self.texture.width},{self.texture.height} Xb {xb}, Yb {yb}, width {width}, height {height}')
-                #label = Label(text = faceLabels[i], font_size = 16, font_family = "arial", halign = 'left', valign = 'middle', color = (0,0.4,1), size_hint = (None, None), size = (100, 40), x = self.x+int(xb), y = self.y+(self.height-int(yb)))
-                #self.add_widget(label)
+                label = Label(text = labels[i], font_size = 16, font_family = "arial", halign = 'left', valign = 'middle', color = (0,0.4,1), size_hint = (None, None), size = (100, 40), x = self.x+int(xb), y = self.y+(self.height-int(yb)))
+                self.add_widget(label)
                 with self.canvas.after:
                     #Color (0,0.69,0.31, 0.9)
                     Color (0,0.64,0.91, 1.0)
                     Line(rectangle = (self.x+xb, self.y+(self.height-yb), width, -height), width = 1.5)
+            
         self.processThisFrame = True
         self.t_process_frame = None
 
@@ -108,15 +119,18 @@ class LiveStream(Video):
 
     def predict (self, faces, model, model_properties=None):
         pass
-        # try:
-        #     vectors = []
-        #     for face in faces:
-        #         #vector = model.predict(face)[0]#.tolist()
-        #         result = model.infer({model_properties[0]: face})
-        #         output = result[model_properties[1]]
-        #         vector = output[0]
-        #         vectors.append(vector)
-        #     return vectors
-        # except Exception as e:
-        #     print ("Something happen during predict")
-        #     print (e)
+        try:
+            labels = []
+            for face in faces:
+                face = np.moveaxis(face,1,-1)
+                vector = model.predict(face)
+                vector = vector.argmax(axis = -1)
+                label = self.aiModel.label.inverse_transform(vector)
+                label = label[0]
+                labels.append(label)
+            print(f'labels : {labels}')
+            return labels
+        except Exception as e:
+            print ("Something happen during predict")
+            print (e)
+    

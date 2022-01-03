@@ -38,6 +38,13 @@ class Manager(BoxLayout):
                 newTab.background_normal = 'images/tab_multiview_normal.png'
                 newTab.background_down = 'images/tab_multiview_down.png'
                 self.headerBar.tabStrip.add_widget(newTab)
+            elif newTab == self.mainTabs.tabListView: #ids.id_tab_multi_view:
+                # New listview tab
+                newTab.size_hint = (None, None)
+                newTab.size = (dp(40), dp(40))
+                newTab.background_normal = 'images/tab_list.png'
+                newTab.background_down = 'images/tab_list_down.png'
+                self.headerBar.tabStrip.add_widget(newTab)
 
     def stop(self):
         self.mainTabs.stop()

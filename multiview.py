@@ -32,7 +32,7 @@ class Multiview(BoxLayout):
     # Vision AI Model
     aiModel = None
     # test stream url
-    testUrl = "images/test.mp4"
+    testUrl = "images/5sos.mp4"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -163,6 +163,7 @@ class Multiview(BoxLayout):
     def create_vision_ai(self):
         try:
             from ai_model import AIModel
+            print("yoy")
             model = AIModel()
             return model
         except Exception as e:

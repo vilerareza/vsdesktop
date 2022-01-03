@@ -5,7 +5,7 @@ from kivy.properties import BooleanProperty, ObjectProperty
 
 from manager import Manager
 
-class VsDesktopApp(App):
+class VsDesktopApp(MDApp):
 
     manager = ObjectProperty(None)
     stop_flag = BooleanProperty(False)

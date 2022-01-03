@@ -1,0 +1,280 @@
+<SummaryPersonBox>:
+    checkinTime: checkin_time
+    checkoutTime: checkout_time
+    avgCheckinTime: avg_checkin_time
+    avgCheckoutTime: avg_checkout_time
+    avgWorkingTime: avg_working_time
+    labelProfile: label_profile
+    rows: 3
+    TextInput:
+        id: label_profile
+        text: "Calumn's Attendance Dashboard"
+        size_hint: (1, 0.3)
+        font_size: 30
+        padding_y: 10, 1
+        foreground_color: rgba('#e3e8e4')
+        background_color: 0.5, 0.5, 0.5
+        background_normal: 'attendance/images/background.png'
+        background_active: 'attendance/images/background.png'
+        readonly: True
+        
+    GridLayout:
+        cols: 4
+        size_hint: (1, 0.35)
+        TextInput:
+            text: "Today :"
+            size_hint: (0.125, 1)
+            font_size: 25
+            padding_y: 17, 1
+            foreground_color: rgba('#252618')
+            background_color: 0.5, 0.5, 0.5
+            background_normal: 'attendance/images/background.png'
+            background_active: 'attendance/images/background.png'
+            readonly: True
+        BoxLayout:
+            id: status
+            orientation: 'horizontal'
+            size_hint: (0.275, 1)
+            spacing: 8
+            padding_x: 5,5
+            StatusButton:
+                id: attend_status
+                text: 'Attend'
+                size_hint: (None, None)
+                height: 30
+                width: 80
+                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            StatusButton:
+                id: sick_status
+                text: 'Sick'
+                size_hint: (None, None)
+                height: 30
+                width: 80
+                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+            StatusButton:
+                id: absent_status
+                text: 'Absent'
+                size_hint: (None, None)
+                height: 30
+                width: 80
+                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+        
+        BoxLayout:
+            id: checkin
+            orientation: 'horizontal'
+            size_hint: (0.3, 1)
+            TextInput:
+                text: "Check-in Time : "
+                size_hint: (0.6, None)
+                height: 35
+                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                font_size: 20
+                halign: 'right'
+                foreground_color: rgba('#252618')
+                background_color: 0.5, 0.5, 0.5
+                background_normal: 'attendance/images/background.png'
+                background_active: 'attendance/images/background.png'
+                readonly: True
+            TextInput:
+                id: checkin_time
+                text: "-"
+                size_hint: (0.4, None)
+                height: 35
+                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                font_size: 20
+                foreground_color: rgba('#252618')
+                background_color: 0.5, 0.5, 0.5
+                background_normal: 'attendance/images/background.png'
+                background_active: 'attendance/images/background.png'
+                readonly: True
+        
+        BoxLayout:
+            id: checkout
+            orientation: 'horizontal'
+            size_hint: (0.3, 1)
+            TextInput:
+                text: "Check-out Time : "
+                size_hint: (0.6, None)
+                height: 35
+                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                font_size: 20
+                halign: 'right'
+                foreground_color: rgba('#252618')
+                background_color: 0.5, 0.5, 0.5
+                background_normal: 'attendance/images/background.png'
+                background_active: 'attendance/images/background.png'
+                readonly: True
+            TextInput:
+                id: checkout_time
+                text: "-"
+                size_hint: (0.4, None)
+                height: 35
+                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                font_size: 20
+                foreground_color: rgba('#252618')
+                background_color: 0.5, 0.5, 0.5
+                background_normal: 'attendance/images/background.png'
+                background_active: 'attendance/images/background.png'
+                readonly: True
+
+    GridLayout:
+        size_hint: (1, 0.35)
+        cols: 4
+        GridLayout:
+            id: average_in
+            size_hint: (0.25, 1)
+            cols: 2
+            FloatLayout:
+                size_hint: (0.2, 1)
+                Image:
+                    size_hint: None, None
+                    size: 35, 35
+                    source: 'images/in.png'
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                    
+            GridLayout:
+                size_hint: (0.8, 1)
+                rows: 2
+                TextInput:
+                    text: "Avg Check-in "
+                    size_hint: (1, 0.5)
+                    font_size: 18
+                    padding_y: 10, 1
+                    foreground_color: rgba('#d1d1d1')
+                    background_color: 0.5, 0.5, 0.5
+                    background_normal: 'attendance/images/background.png'
+                    background_active: 'attendance/images/background.png'
+                    readonly: True
+                TextInput:
+                    id: avg_checkin_time
+                    text: "-"
+                    size_hint: (1, 0.5)
+                    font_size: 18
+                    padding_y: 1, 10
+                    foreground_color: rgba('#252618')
+                    background_color: 0.5, 0.5, 0.5
+                    background_normal: 'attendance/images/background.png'
+                    background_active: 'attendance/images/background.png'
+                    readonly: True
+        
+        GridLayout:
+            id: average_out
+            size_hint: (0.25, 1)
+            cols: 2
+            FloatLayout:
+                size_hint: (0.2, 1)
+                Image:
+                    size_hint: None, None
+                    size: 35, 35
+                    source: 'images/out.png'
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                
+            GridLayout:
+                size_hint: (0.8, 1)
+                rows: 2
+                TextInput:
+                    text: "Avg Check-out "
+                    size_hint: (1, 0.5)
+                    font_size: 18
+                    padding_y: 10, 1
+                    foreground_color: rgba('#d1d1d1')
+                    background_color: 0.5, 0.5, 0.5
+                    background_normal: 'attendance/images/background.png'
+                    background_active: 'attendance/images/background.png'
+                    readonly: True
+                TextInput:
+                    id: avg_checkout_time
+                    text: "-"
+                    size_hint: (1, 0.5)
+                    font_size: 18
+                    padding_y: 1, 10
+                    foreground_color: rgba('#252618')
+                    background_color: 0.5, 0.5, 0.5
+                    background_normal: 'attendance/images/background.png'
+                    background_active: 'attendance/images/background.png'
+                    readonly: True
+
+        GridLayout:
+            id: average_work
+            size_hint: (0.25, 1)
+            cols: 2
+            FloatLayout:
+                size_hint: (0.2, 1)
+                Image:
+                    size_hint: None, None
+                    size: 35, 35
+                    source: 'images/average.png'
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                
+            GridLayout:
+                size_hint: (0.8, 1)
+                rows: 2
+                TextInput:
+                    text: "Avg Working Hour "
+                    size_hint: (1, 0.5)
+                    font_size: 18
+                    padding_y: 10, 1
+                    foreground_color: rgba('#d1d1d1')
+                    background_color: 0.5, 0.5, 0.5
+                    background_normal: 'attendance/images/background.png'
+                    background_active: 'attendance/images/background.png'
+                    readonly: True
+                TextInput:
+                    id: avg_working_time
+                    text: "08:00:00"
+                    size_hint: (1, 0.5)
+                    font_size: 18
+                    padding_y: 1, 10
+                    foreground_color: rgba('#252618')
+                    background_color: 0.5, 0.5, 0.5
+                    background_normal: 'attendance/images/background.png'
+                    background_active: 'attendance/images/background.png'
+                    readonly: True
+        
+        GridLayout:
+            id: total_absent
+            size_hint: (0.25, 1)
+            cols: 2
+            FloatLayout:
+                size_hint: (0.2, 1)
+                Image:
+                    size_hint: None, None
+                    size: 35, 35
+                    source: 'images/absent.png'
+                    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                
+            GridLayout:
+                size_hint: (0.8, 1)
+                rows: 2
+                TextInput:
+                    text: "Absent / Leave"
+                    size_hint: (1, 0.5)
+                    font_size: 18
+                    padding_y: 10, 1
+                    foreground_color: rgba('#d1d1d1')
+                    background_color: 0.5, 0.5, 0.5
+                    background_normal: 'attendance/images/background.png'
+                    background_active: 'attendance/images/background.png'
+                    readonly: True
+                TextInput:
+                    id: absent_time
+                    text: "10"
+                    size_hint: (1, 0.5)
+                    font_size: 18
+                    padding_y: 1, 10
+                    foreground_color: rgba('#252618')
+                    background_color: 0.5, 0.5, 0.5
+                    background_normal: 'attendance/images/background.png'
+                    background_active: 'attendance/images/background.png'
+                    readonly: True
+
+<StatusButton@Button>:
+    background_color: [0, 0, 0, 0]
+    canvas.before:
+        Color:
+            # id: button_color
+            rgb: rgba('#2aa3e2')
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [20]
