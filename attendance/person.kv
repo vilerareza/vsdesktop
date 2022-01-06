@@ -11,6 +11,7 @@
     jobLabel: job_label
     summaryBox: summary_box
     bottomBox: bottom_box
+    dropPersonBox: drop_person_box
     id: person_list
     orientation: 'vertical'
 
@@ -33,7 +34,7 @@
                     orientation: 'vertical'
                     FloatLayout:
                         id: profile_picture
-                        pict: 'images/temp/profile/User.png'
+                        pict: ""
                         canvas:
                             Color:
                                 rgb: 1, 1, 1
@@ -62,25 +63,53 @@
             orientation: 'vertical'
             size_hint: 0.8, 1                
             FloatLayout:
+                id: drop_person_box
                 size_hint: (1, 0.175)
-                RoundedButton:
+                MDTextFieldRound:
                     id: choose_button
-                    text: 'Choose Person'
+                    icon_right : 'magnify'
+                    hint_text: 'Search Person'
                     size_hint: (None, None)
-                    height: 30
-                    width: 150
-                    pos_hint: {'right': 0.98, 'center_y': 0.5}
-                    on_press: root.drop_name()
-                    on_release: drop_person.open(self)
-
-                DropDown:
-                    id: drop_person
-                    max_height: dp(120)
+                    size: 250, 30
+                    pos_hint: {'right': 0.95, 'center_y': 0.5}
+                    color_active: 1,1,0,1
+                    on_text: root.refresh_search_person() if choose_button.text == "" else root.search_person(self)                
             
             BoxLayout:
                 id: summary_box
                 orientation: 'vertical'
                 size_hint: 1, 0.7
+                RecycleView:
+                    id: drop_person
+                    viewclass: 'Button'
+                    orientation: "vertical"
+                    size_hint: (None, None)
+                    width: 270
+                    height: 180
+                    pos_hint: {'right': 0.96, 'center_y': 0.4}
+                    # on_release: root.show_profile(self)
+                    # y: drop_person_box.y - 100
+                    # x: choose_button.x 
+                    canvas.before:
+                        Color:
+                            rgb: 1, 1, 0
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+                    RecycleBoxLayout:
+                        # padding: dp(5)
+                        default_size: 270, 30
+                        default_size_hint: None, None
+                        size_hint_y: None
+                        height: self.minimum_height
+                        orientation: 'vertical'
+                        # canvas.before:
+                        #     Color:
+                        #         rgb: 1, 0, 0
+                        #     Rectangle:
+                        #         pos: self.pos
+                        #         size: self.size
+
                 
             BoxLayout:
                 id: space_box

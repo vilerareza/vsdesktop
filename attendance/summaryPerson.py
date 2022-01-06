@@ -75,7 +75,6 @@ class SummaryPersonBox(GridLayout):
         except:
             self.avgWorkingTime.text = '-'
 
-
     def show_summary_person(self):
         self.get_today_data(self.name, ('in', 'late'), self.checkinTime)
         self.get_today_data(self.name, 'out', self.checkoutTime)

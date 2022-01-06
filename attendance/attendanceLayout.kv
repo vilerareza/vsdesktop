@@ -34,6 +34,16 @@
                 pos_hint: {'center_x': 0.5}
                 y: all_data.y - dp(48)
                 on_press: root.show_person()
+            
+            RoundedButton:
+                id: add_person
+                text: 'Add Person'
+                # background_color: [1, 0, 1, 0.6]
+                size_hint: (0.8, None)
+                height: 40
+                pos_hint: {'center_x': 0.5}
+                y: person.y - dp(48)
+                on_press: root.add_person()
 
     BoxLayout:
         id: right_box

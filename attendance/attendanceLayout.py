@@ -12,20 +12,24 @@ from kivy.uix.image import Image
 from kivy.clock import Clock
 
 from attendance.person import PersonList
+from attendance.addperson import AddPerson
 
 Builder.load_file('attendance/attendanceLayout.kv')
 
 class AttendanceLayout(BoxLayout):
-    db = ObjectProperty({'dbName': 'attendance/attendanceData.db', 'tableName': 'data'})
+    db = ObjectProperty({'dbName': 'attendance/attendanceData.db', 'tableName': ['data', 'employee']})
     rightBox = ObjectProperty(None)
     listData = ListProperty([])
     listName = ListProperty([])
     index = NumericProperty(2)
     personListBox = ObjectProperty(None)
+    listPerson = ObjectProperty({})
+    addPersonBox = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.personListBox = PersonList()
+        self.addPersonBox = AddPerson()
         self.tableBox = FloatLayout()
         self.table = MDDataTable(size_hint=(0.9, 0.9),
                                 #  background_color_header= [0.5, 0.5, 0.5, 0],
@@ -43,20 +47,24 @@ class AttendanceLayout(BoxLayout):
                                  pagination_menu_height = '240dp',
                                  rows_num = 7)
         self.tableBox.add_widget(self.table)
-        # self.bind(listName = self.personListBox.get_name)
-        # self.get_item_from_db()
-
+        self.get_item_from_db()
+        # self.bind(listPerson = self.personListBox.get_all_person)
+        
     def get_item_from_db(self):
         dbName = self.db['dbName']
-        tableName = self.db['tableName']
-        sql = "SELECT * FROM "+tableName+""
         con = sqlite3.connect(dbName)
         cur = con.cursor()
+        sql = "SELECT * FROM "+self.db['tableName'][0]+""
         cur.execute(sql)
         for entry in cur:
             self.listData.append(entry)
             self.listName.append(entry[1])
-        con.close()
+
+        # sql = "SELECT * FROM "+self.db['tableName'][1]+""
+        # cur.execute(sql)
+        # for entry in cur:
+        #     self.listPerson[entry[1]] = entry[2:]
+        # con.close()
 
         self.table.row_data = self.listData
 
@@ -98,6 +106,10 @@ class AttendanceLayout(BoxLayout):
     def show_person(self):
         self.rightBox.clear_widgets()
         self.rightBox.add_widget(self.personListBox)
+
+    def add_person(self):
+        self.rightBox.clear_widgets()
+        self.rightBox.add_widget(self.addPersonBox)
 
 
 

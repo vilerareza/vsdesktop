@@ -5,6 +5,7 @@ from kivy.properties import ObjectProperty, ListProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.lang import Builder
 from kivy.uix.button import Button
+from functools import partial
 
 from attendance.calendar import CalendarBox
 from attendance.summaryPerson import SummaryPersonBox
@@ -15,6 +16,7 @@ class PersonList(BoxLayout):
     personListLayout = ObjectProperty(None)
     listName = ListProperty([])
     dropPerson = ObjectProperty(None)
+    dropPersonBox = ObjectProperty(None)
     chooseButton = ObjectProperty(None)
     attendStatus = ObjectProperty(None)
     profileCardBox = ObjectProperty(None)
@@ -28,6 +30,7 @@ class PersonList(BoxLayout):
     summaryPersonBox = ObjectProperty(None)
     name = ObjectProperty(None)
     db = ObjectProperty({'dbName': 'attendance/attendanceData.db', 'tableName': 'employee'})
+    listPerson = {}
     
 
     def __init__(self, **kwargs):
@@ -35,40 +38,31 @@ class PersonList(BoxLayout):
         self.calendarBox = CalendarBox()
         self.summaryPersonBox = SummaryPersonBox()
         self.profileCardBox.clear_widgets()
-        self.get_profile_database()
         self.bind(name = self.summaryPersonBox.get_name)
         self.bind(name = self.calendarBox.get_name)
+        self.get_profile_database()
+        # self.bind(self.chooseButton.on_text = self.coba)
 
-        # self.con = sqlite3.connect(self.db['dbName'])
-        # self.cur = self.con.cursor
+    # def get_all_person(self, attendanceLayout, listPerson):
+    #     print('yoooy')
+    #     self.listPerson = listPerson
 
 
     def get_profile_database(self):
         dbName = self.db['dbName']
         tableName = self.db['tableName']
-        sql = "SELECT name FROM "+tableName+""
+        sql = "SELECT name, position FROM "+tableName+""
         con = sqlite3.connect(dbName)
         cur = con.cursor()
         cur.execute(sql)
         for entry in cur:
-            self.listName.append(entry[0])
-        con.close()
-    
-    def get_profile_position(self, name):
-        dbName = self.db['dbName']
-        tableName = self.db['tableName']
-        sql = f"SELECT position FROM {tableName} WHERE name = '{name}'"
-        con = sqlite3.connect(dbName)
-        cur = con.cursor()
-        cur.execute(sql)
-        for entry in cur:
-            position = entry[0]
-        con.close()
-        return position      
+            self.listPerson[entry[0]] = entry[1]
+
+        print(self.listPerson)
+        con.close()   
 
     def drop_name(self):
-        self.listName = set(self.listName)
-        print(self.listName)
+        self.listName = list(self.listPerson.keys())
         self.dropPerson.clear_widgets()
         for name in self.listName:
             personButton = Button(text = name,
@@ -82,11 +76,12 @@ class PersonList(BoxLayout):
         self.dropPerson.bind(on_select=lambda instance, x: setattr(self.chooseButton, 'text', x))
 
     def get_profile(self, name):
-        position = self.get_profile_position(name)
+        position = self.listPerson[name]
         print(position)
-        path = f'images/temp/profile/{name}.jpg'
+        path = f"images/temp/profile/{name}.jpg"
+        print(f'path = {path}')
         if os.path.exists(path):
-            self.profilePicture.pict =  path
+            self.profilePicture.pict = path
         else:
             self.profilePicture.pict = 'images/temp/profile/User.png'
        
@@ -94,8 +89,11 @@ class PersonList(BoxLayout):
         self.jobLabel.text = position
 
     def show_profile(self, widget):
-        # self.calendarBox.refresh()
-        self.name = widget.text
+        self.refresh_search_person()
+        self.chooseButton.text = ""
+        self.dropPerson.size = (270, 0)
+        print(f'name {widget}')
+        self.name = widget
         self.get_profile(self.name)
         self.summaryPersonBox.show_summary_person()
         self.calendarBox.show_calendar('change')
@@ -104,6 +102,22 @@ class PersonList(BoxLayout):
             self.profileCardBox.add_widget(self.profileCard)
             self.summaryBox.add_widget(self.summaryPersonBox)
             self.bottomBox.add_widget(self.calendarBox)
+
+    def refresh_search_person(self):
+        self.dropPerson.data.clear()
+        self.dropPerson.refresh_from_data()
+        self.dropPerson.refresh_from_layout()
+
+    def search_person(self, widget):
+        self.dropPerson.size = (270, 180)
+        print(f'widget text {widget.text}')
+        self.refresh_search_person()
+        for name in self.listPerson:
+            if widget.text.lower() in name.lower():
+                self.dropPerson.data.append({
+                    "text" : name,
+                    "on_press" : partial(self.show_profile, name)
+                })
 
         
 
